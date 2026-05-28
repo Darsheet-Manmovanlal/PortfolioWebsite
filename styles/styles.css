@@ -51,6 +51,15 @@
   --muted-text: #54607a;
   --heading: #102a43;
   --text-primary: #222;
+
+  /* Top bar liquid glass defaults */
+  --top-bar-opacity-start: 0.25;
+  --top-bar-opacity-end: 0.52;
+  --top-bar-blur-start: 2;
+  --top-bar-blur-end: 5;
+  --top-bar-text-dark: 17, 24, 39;
+  --top-bar-text-light: 255, 255, 255;
+  --top-bar-text: 17, 24, 39;
 }
 
 /* Dark Mode */
@@ -64,6 +73,8 @@ html.dark-mode {
   --muted-text: #a8b0c0;
   --heading: #e8ecf1;
   --text-primary: #e8ecf1;
+  --top-bar-opacity-start: 0.3;
+  --top-bar-opacity-end: 0.65;
 }
 
 html, body {
@@ -97,20 +108,21 @@ body {
   left: 0;
   right: 0;
   z-index: 999;
-  background: rgba(255, 255, 255, 0.85);
-  border-bottom: 1px solid rgba(200, 200, 200, 0.4);
-  box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
+  background: rgba(255, 255, 255, var(--top-bar-opacity-start));
+  border-bottom: 1px solid rgba(255, 255, 255, 0.72);
+  box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
+  backdrop-filter: blur(var(--top-bar-blur-start));
+  -webkit-backdrop-filter: blur(var(--top-bar-blur-start));
   padding: 0.75rem var(--gutter);
-  transition: background-color 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+  transition: background-color 300ms ease, backdrop-filter 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
 }
 html.dark-mode .top-bar {
-  background: rgba(15, 20, 25, 0.85);
   border-bottom-color: rgba(58, 63, 77, 0.5);
-  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
 .top-links {
   display: flex;
@@ -122,7 +134,7 @@ html.dark-mode .top-bar {
   list-style: none;
 }
 .top-links a {
-  color: var(--text-primary);
+  color: rgb(var(--top-bar-text));
   text-decoration: none;
   font-weight: 600;
   transition: color 300ms ease;
@@ -171,6 +183,38 @@ html.dark-mode .toggle-track {
 html.dark-mode .toggle-thumb {
   left: calc(100% - 1.15rem);
   background: #3b82f6;
+}
+
+/* Search Bar */
+.search-bar {
+  flex: 1;
+  min-width: 150px;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 2rem;
+  padding: 0.5rem 1rem;
+  color: var(--text-primary);
+  font-size: 0.95rem;
+  transition: background 300ms ease, border-color 300ms ease, color 300ms ease;
+}
+html.dark-mode .search-bar {
+  background: rgba(100, 120, 180, 0.15);
+  border-color: rgba(100, 120, 180, 0.3);
+}
+.search-bar::placeholder {
+  color: rgba(200, 200, 200, 0.7);
+}
+html.dark-mode .search-bar::placeholder {
+  color: rgba(200, 200, 220, 0.6);
+}
+.search-bar:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(0, 0, 0, 0.35);
+}
+html.dark-mode .search-bar:focus {
+  background: rgba(100, 120, 180, 0.25);
+  border-color: rgba(100, 120, 180, 0.5);
 }
 
 /* Sidebar styles are no longer used */
