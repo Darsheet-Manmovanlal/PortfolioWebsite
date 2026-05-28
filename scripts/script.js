@@ -89,3 +89,52 @@ if (topBar) {
   window.addEventListener('resize', updateGlassEffect, { passive: true });
   updateGlassEffect();
 }
+
+/* ---------- Music Player Toggle ---------- */
+const musicBtn = document.getElementById('about-music-play');
+const musicProgress = document.getElementById('about-music-progress');
+
+if (musicBtn && musicProgress) {
+  let playing = false;
+  let progressVal = 0;
+  let progressInterval = null;
+
+  const startProgress = () => {
+    if (progressInterval) return;
+    progressInterval = setInterval(() => {
+      progressVal = Math.min(100, progressVal + 0.5);
+      musicProgress.style.width = progressVal + '%';
+      if (progressVal >= 100) {
+        stopProgress();
+        musicBtn.classList.remove('is-playing');
+        playing = false;
+        progressVal = 0;
+        musicProgress.style.width = '0%';
+      }
+    }, 200);
+  };
+
+  const stopProgress = () => {
+    clearInterval(progressInterval);
+    progressInterval = null;
+  };
+
+  musicBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    playing = !playing;
+    musicBtn.classList.toggle('is-playing', playing);
+    if (playing) {
+      startProgress();
+    } else {
+      stopProgress();
+    }
+  });
+
+  /* Expand permanently on first hover */
+  const aboutSection = document.getElementById('about-section');
+  if (aboutSection) {
+    aboutSection.addEventListener('mouseenter', () => {
+      aboutSection.classList.add('is-expanded');
+    }, { once: true });
+  }
+}
