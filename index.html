@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Portfolio</title>
+    <link rel="stylesheet" href="styles.css">
+    <script src="darkmode.js"></script>
+    <script src="script.js" defer></script>
+</head>
+<body>
+    <header class="hero" align="center">
+        <h1>Hi, I'm Darsheet Manmovanlal</h1>
+        <p>This is a website outlining my skills and experience.</p>
+        <nav class="top-bar" aria-label="Useful links">
+            <ul class="top-links">
+                <li><a href="#about">About Me</a></li>
+                <li><a href="#projects">My Projects</a></li>
+                <li><a href="#experience">Past Experience</a></li>
+                <li><a href="#contact">Contact Me</a></li>
+            </ul>
+            <input type="search" class="search-bar" placeholder="Search..." aria-label="Search">
+            <button id="dark-mode-toggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
+                <span class="toggle-track">
+                    <span class="toggle-thumb"></span>
+                </span>
+            </button>
+        </nav>
+    </header>
+
+    <main class="container">
+      <section class="section-panel about-section" id="about-section">
+        <h2 id="about">About Me</h2>
+        <p>A strong passion with cutting edge computers/systems, keeping up-to-date on the latest trends, alongside a heavy interest in photography. I also love creating song covers with my friends, involved in the bandlab space.</p>
+
+        <div class="about-expanded">
+          <div class="about-card" style="--rot:-3deg; --delay:0ms">
+            <div class="about-placeholder about-ph-1">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+          <div class="about-card" style="--rot:5deg; --delay:60ms">
+            <div class="about-placeholder about-ph-2">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+          <div class="about-card" style="--rot:-2deg; --delay:120ms">
+            <div class="about-placeholder about-ph-3">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+          <div class="about-card" style="--rot:4deg; --delay:180ms">
+            <div class="about-placeholder about-ph-4">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+          <div class="about-card about-card-music" style="--rot:-4deg; --delay:240ms">
+            <div class="music-player" id="about-music-player">
+              <div class="music-player-info">
+                <span class="music-note-icon">♫</span>
+                <span class="music-title">Song Cover</span>
+                <span class="music-artist">With Friends · BandLab</span>
+              </div>
+              <button class="music-play-btn" id="about-music-play" aria-label="Play">
+                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
+                <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+              </button>
+              <div class="music-bottom">
+                <span class="music-time">0:00</span>
+                <div class="music-progress-track">
+                  <div class="music-progress-fill" id="about-music-progress"></div>
+                </div>
+                <span class="music-time">3:24</span>
+              </div>
+            </div>
+          </div>
+          <div class="about-card" style="--rot:3deg; --delay:300ms">
+            <div class="about-placeholder about-ph-5">
+              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section class="section-panel">
+        <h2 id="experience">Past Experiences</h2>
+
+        <div class="section-block">
+          <h3>Stratford community food hub, E15 1BG</h3>
+          <p><strong>Food Hub Assistant</strong></p>
+          <p>Apr 2021 - Jul 2021</p>
+          <ul>
+            <li>Packaged bags full of groceries, containing fruits, bread etc, handed out to people in need</li>
+            <li>Utilized teamwork skills to accelerate the process of getting food ready to be sent out through working together on a single bag of produce or handling multiple pallets of bags</li>
+            <li>Showcased communication by talking through, placing crates of bags belonging to the correct side</li>
+            <li>Recorded codes of specific consumers to be handed their unique bag of food</li>
+            <li>Organisational skills applied when required to re-stock produce from newly arrived crates using a pallet lifter</li>
+            <li>Actively kept the building tidy, taking out large bin bags daily</li>
+          </ul>
+        </div>
+
+        <hr>
+
+        <div class="section-block">
+          <h3>Peacocks, East Ham</h3>
+          <p><strong>Floor Staff</strong></p>
+          <ul>
+            <li>Moved around clothing payload using cargo elevators</li>
+            <li>Assisted shoppers with directions on clothing along with other utilities</li>
+            <li>Kept the store tidy through picking up fallen clothes and gave tags to items</li>
+          </ul>
+        </div>
+
+        <hr>
+
+        <div class="section-block">
+          <h3>Young Professionals, Online</h3>
+          <p>Aug 2019 - Aug 2019</p>
+          <ul>
+            <li>Gained insight across multiple firms such as IBM, EY, Capgemini</li>
+            <li>Listened to speakers from numerous companies on the pathways they took, e.g. apprenticeship</li>
+            <li>Made connections to these firms through linkedin</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section-panel">
+        <div class="section-heading">
+          <h2 id="contact">Contact Me</h2>
+        </div>
+
+        <form>
+          <div class="form-grid">
+            <label for="name" class="sr-only">Name</label>
+            <input type="text" id="name" name="name" placeholder="Name">
+
+            <label for="email" class="sr-only">Email</label>
+            <input type="text" id="email" name="email" placeholder="Email address">
+
+            <label for="query" class="sr-only">Query</label>
+            <textarea id="query" name="query" class="query-input" placeholder="Your question or message"></textarea>
+
+            <button type="submit">Submit</button>
+          </div>
+        </form>
+      </section>
+
+    </main>
+
+<footer class="site-footer">
+    <p>Made by Darsheet, 2026</p>
+</footer>
+
+</body>
+</html>
