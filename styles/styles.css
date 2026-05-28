@@ -53,6 +53,19 @@
   --text-primary: #222;
 }
 
+/* Dark Mode */
+html.dark-mode {
+  --page-bg: #0f1419;
+  --card-bg: #1a1f2e;
+  --muted-border: #2a2f3d;
+  --muted-border-2: #3a3f4d;
+  --accent: #3b82f6;
+  --accent-dark: #1d4ed8;
+  --muted-text: #a8b0c0;
+  --heading: #e8ecf1;
+  --text-primary: #e8ecf1;
+}
+
 html, body {
   margin: 0;
   padding: 0;
@@ -60,6 +73,7 @@ html, body {
   color: var(--text-primary);
   background: var(--page-bg);
   line-height: 1.45;
+  transition: background 300ms ease, color 300ms ease;
 }
 body {
   padding-top: 4rem; /* make room for the fixed top bar */
@@ -87,10 +101,16 @@ body {
   border-bottom: 1px solid rgba(200, 200, 200, 0.4);
   box-shadow: 0 2px 8px rgba(15, 23, 42, 0.06);
   padding: 0.75rem var(--gutter);
+  transition: background-color 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
   display: flex;
   justify-content: space-between;
   align-items: center;
   gap: 1rem;
+}
+html.dark-mode .top-bar {
+  background: rgba(15, 20, 25, 0.85);
+  border-bottom-color: rgba(58, 63, 77, 0.5);
+  box-shadow: 0 2px 8px rgba(0, 0, 0, 0.3);
 }
 .top-links {
   display: flex;
@@ -105,17 +125,88 @@ body {
   color: var(--text-primary);
   text-decoration: none;
   font-weight: 600;
+  transition: color 300ms ease;
 }
 .top-links a:hover {
   text-decoration: underline;
 }
 
+/* Dark Mode Toggle */
+.dark-mode-toggle {
+  background: none;
+  border: none;
+  cursor: pointer;
+  padding: 0.5rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.toggle-track {
+  position: relative;
+  display: inline-block;
+  width: 2.5rem;
+  height: 1.3rem;
+  background: rgba(200, 200, 200, 0.5);
+  border-radius: 1rem;
+  transition: background 300ms ease;
+  border: 1px solid rgba(150, 150, 150, 0.4);
+}
+html.dark-mode .toggle-track {
+  background: rgba(100, 120, 180, 0.5);
+  border-color: rgba(100, 120, 180, 0.6);
+}
+.toggle-thumb {
+  position: absolute;
+  top: 0.15rem;
+  left: 0.15rem;
+  width: 1rem;
+  height: 1rem;
+  background: white;
+  border-radius: 50%;
+  transition: left 300ms ease, background 300ms ease;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+html.dark-mode .toggle-thumb {
+  left: calc(100% - 1.15rem);
+  background: #3b82f6;
+}
+
+/* Sidebar styles are no longer used */
+
 /* ---------- Header / Hero ---------- */
 .hero {
-  background: linear-gradient(90deg, #ffffff, #f6fbff);
+  position: relative;
   padding: var(--space-lg) var(--gutter);
   border-bottom: 1px solid var(--muted-border-2);
   text-align: center;
+  transition: border-color 300ms ease;
+  z-index: 1;
+}
+
+/* Light mode background */
+.hero::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #ffffff, #f6fbff);
+  z-index: -1;
+}
+
+/* Dark mode background */
+.hero::after {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, #1a1f2e, #151d2d);
+  z-index: -1;
+  opacity: 0;
+  transition: opacity 300ms ease;
+}
+
+html.dark-mode .hero::after {
+  opacity: 1;
 }
 .hero h1 {
   margin: 0 0 0.25rem 0;
@@ -124,6 +215,7 @@ body {
 .hero p {
   margin: 0;
   color: var(--muted-text);
+  transition: color 300ms ease;
 }
 
 /* ---------- Page sections ---------- */
@@ -133,6 +225,7 @@ body {
   border-radius: var(--radius);
   box-shadow: var(--shadow-soft);
   padding: var(--space-lg);
+  transition: background 300ms ease, border-color 300ms ease;
 }
 .section-panel + .section-panel {
   margin-top: var(--space-lg);
@@ -156,10 +249,12 @@ h2[id] {
   text-decoration-color: var(--accent);
   text-decoration-thickness: 2px;
   text-underline-offset: 0.2rem;
+  transition: color 300ms ease, text-decoration-color 300ms ease;
 }
 
 h3 {
   color: var(--heading);
+  transition: color 300ms ease;
 }
 
 /* Lists inside content */
@@ -196,6 +291,11 @@ form textarea {
   font: inherit;
   background: var(--card-bg);
   color: var(--text-primary);
+  transition: background 300ms ease, color 300ms ease, border-color 300ms ease;
+}
+html.dark-mode form input[type="text"],
+html.dark-mode form textarea {
+  border-color: var(--muted-border-2);
 }
 form textarea {
   min-height: 6rem;
@@ -217,6 +317,7 @@ form button[type="submit"] {
   border-radius: 6px;
   cursor: pointer;
   justify-self: start;
+  transition: background 300ms ease;
 }
 form button[type="submit"]:hover {
   background: var(--accent-dark);
@@ -224,6 +325,7 @@ form button[type="submit"]:hover {
 
 input::placeholder {
   color: var(--muted-text);
+  transition: color 300ms ease;
 }
 
 /* Footer */
@@ -233,6 +335,7 @@ input::placeholder {
   padding: 0.75rem var(--gutter);
   color: var(--muted-text);
   text-align: center;
+  transition: color 300ms ease;
 }
 
 /* Horizontal rule styling */
