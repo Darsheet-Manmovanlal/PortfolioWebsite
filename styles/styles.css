@@ -285,6 +285,7 @@ html.dark-mode .hero::after {
   margin-bottom: 0;
 }
 
+
 h2[id] {
   color: var(--heading);
   text-decoration: underline;
@@ -433,13 +434,13 @@ html.dark-mode .about-section.is-expanded {
 }
 
 .about-section.is-expanded .about-expanded {
-  max-height: 32rem;
+  max-height: 50rem;
   opacity: 1;
   transform: scale(1);
-  padding: 0.75rem 1rem;
+  margin: -3.75rem -5rem -5.25rem -5rem;
+  padding: 6rem;
 }
 
-/* Individual cards */
 .about-card {
   aspect-ratio: 3 / 2;
   border-radius: 14px;
@@ -449,8 +450,23 @@ html.dark-mode .about-section.is-expanded {
   transition:
     opacity 420ms ease var(--delay, 0ms),
     transform 520ms cubic-bezier(0.34, 1.56, 0.64, 1) var(--delay, 0ms),
-    box-shadow 300ms ease;
-  box-shadow: 0 4px 16px rgba(0, 0, 0, 0.10);
+    box-shadow 300ms ease,
+    filter 300ms ease;
+  box-shadow: 0 0 0 1px transparent, 0 4px 16px rgba(0, 0, 0, 0.10);
+  position: relative;
+  filter: blur(0px);
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  outline: 1px solid transparent;
+  transform-style: preserve-3d;
+}
+
+.about-card-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+  cursor: pointer;
 }
 
 .about-section.is-expanded .about-card {
@@ -459,35 +475,15 @@ html.dark-mode .about-section.is-expanded {
 }
 
 .about-section.is-expanded .about-card:hover {
-  transform: rotate(0deg) scale(1.07);
-  box-shadow: 0 10px 32px rgba(0, 0, 0, 0.18);
+  transform: rotate(0deg) scale(1.07) translateZ(10px);
+  box-shadow: 0 0 0 1px transparent, 0 10px 32px rgba(0, 0, 0, 0.18);
   z-index: 2;
   transition-delay: 0ms;
 }
 
-/* ---------- Image placeholders ---------- */
-.about-placeholder {
-  width: 100%;
-  height: 100%;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  cursor: pointer;
+.about-expanded.viewer-active .about-card:not(.is-active) {
+  opacity: 0.28;
 }
-
-.about-placeholder svg {
-  width: 2.4rem;
-  height: 2.4rem;
-  color: rgba(255, 255, 255, 0.55);
-  filter: drop-shadow(0 2px 4px rgba(0,0,0,0.15));
-}
-
-/* Each placeholder gets a unique gradient */
-.about-ph-1 { background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%); }
-.about-ph-2 { background: linear-gradient(135deg, #4facfe 0%, #00f2fe 100%); }
-.about-ph-3 { background: linear-gradient(135deg, #43e97b 0%, #38f9d7 100%); }
-.about-ph-4 { background: linear-gradient(135deg, #fa709a 0%, #fee140 100%); }
-.about-ph-5 { background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%); }
 
 /* ---------- Music Player Card ---------- */
 .music-player {
@@ -626,6 +622,72 @@ html.dark-mode .about-section.is-expanded {
   animation: spin-disc 3s linear infinite;
 }
 
+/* ---------- Image Viewer ---------- */
+.about-image-viewer {
+  position: absolute;
+  left: 0;
+  top: 0;
+  width: 0;
+  height: 0;
+  border-radius: 14px;
+  overflow: hidden;
+  background: transparent;
+  pointer-events: none;
+  visibility: hidden;
+  z-index: 20;
+  box-shadow: 0 24px 72px rgba(0, 0, 0, 0.28);
+  transform-origin: center center;
+}
+
+.about-image-viewer.is-active {
+  pointer-events: auto;
+}
+
+.viewer-back-btn {
+  position: absolute;
+  top: 0.75rem;
+  left: 0.75rem;
+  background: rgba(0, 0, 0, 0.35);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 50%;
+  color: #fff;
+  width: 2.2rem;
+  height: 2.2rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 21;
+  transition: transform 200ms ease, background 200ms ease, opacity 200ms ease;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.about-image-viewer.img-visible .viewer-back-btn {
+  opacity: 1;
+  pointer-events: auto;
+}
+
+.viewer-back-btn:hover {
+  transform: scale(1.12);
+  background: rgba(0, 0, 0, 0.55);
+}
+
+.viewer-back-btn svg {
+  width: 1.2rem;
+  height: 1.2rem;
+  filter: drop-shadow(0 1px 3px rgba(0,0,0,0.4));
+}
+
+.viewer-image {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  opacity: 1;
+}
+
 /* ---------- Responsive adjustments ---------- */
 @media (max-width: 820px) {
   .top-links {
@@ -641,6 +703,17 @@ html.dark-mode .about-section.is-expanded {
   .about-expanded {
     grid-template-columns: repeat(2, 1fr);
   }
+}
+
+.about-expanded.viewer-active .about-card {
+  pointer-events: none;
+  filter: blur(5px);
+  opacity: 0.3;
+  transition-delay: 0ms !important;
+}
+
+.about-expanded.viewer-active .about-card.is-active {
+  opacity: 0;
 }
 
 /* End of file */

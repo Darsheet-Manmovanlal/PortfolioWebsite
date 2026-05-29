@@ -15,6 +15,7 @@
         <nav class="top-bar" aria-label="Useful links">
             <ul class="top-links">
                 <li><a href="#about">About Me</a></li>
+                <li><a href="#skills">Skills</a></li>
                 <li><a href="#projects">My Projects</a></li>
                 <li><a href="#experience">Past Experience</a></li>
                 <li><a href="#contact">Contact Me</a></li>
@@ -33,26 +34,18 @@
         <h2 id="about">About Me</h2>
         <p>A strong passion with cutting edge computers/systems, keeping up-to-date on the latest trends, alongside a heavy interest in photography. I also love creating song covers with my friends, involved in the bandlab space.</p>
 
-        <div class="about-expanded">
+        <div class="about-expanded" style="position: relative;">
           <div class="about-card" style="--rot:-3deg; --delay:0ms">
-            <div class="about-placeholder about-ph-1">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </div>
+            <img class="about-card-image" src="images/image1.jpg" alt="Photography sample 1" loading="lazy">
           </div>
           <div class="about-card" style="--rot:5deg; --delay:60ms">
-            <div class="about-placeholder about-ph-2">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </div>
+            <img class="about-card-image" src="images/image2.jpg" alt="Photography sample 2" loading="lazy">
           </div>
           <div class="about-card" style="--rot:-2deg; --delay:120ms">
-            <div class="about-placeholder about-ph-3">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </div>
+            <img class="about-card-image" src="images/image.3jpg.jpg" alt="Photography sample 3" loading="lazy">
           </div>
           <div class="about-card" style="--rot:4deg; --delay:180ms">
-            <div class="about-placeholder about-ph-4">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </div>
+            <img class="about-card-image" src="images/image4.jpg" alt="Photography sample 4" loading="lazy">
           </div>
           <div class="about-card about-card-music" style="--rot:-4deg; --delay:240ms">
             <div class="music-player" id="about-music-player">
@@ -75,15 +68,67 @@
             </div>
           </div>
           <div class="about-card" style="--rot:3deg; --delay:300ms">
-            <div class="about-placeholder about-ph-5">
-              <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M23 19a2 2 0 0 1-2 2H3a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h4l2-3h6l2 3h4a2 2 0 0 1 2 2z"/><circle cx="12" cy="13" r="4"/></svg>
-            </div>
+            <img class="about-card-image" src="images/image5.jpg" alt="Photography sample 5" loading="lazy">
+          </div>
+
+          <div class="about-image-viewer" id="about-image-viewer">
+            <button class="viewer-back-btn" id="viewer-back-btn" aria-label="Back">
+              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="16,4 6,12 16,20"/></svg>
+            </button>
+            <img src="" alt="Expanded View" class="viewer-image" id="viewer-image">
           </div>
         </div>
       </section>
 
       <section class="section-panel">
-        <h2 id="experience">Past Experiences</h2>
+        <h2 id="skills">Skills</h2>
+        <ul class="content-list">
+          <li>Communicative</li>
+          <li>Collaborative</li>
+          <li>Python</li>
+          <li>Java</li>
+          <li>SQL</li>
+          <li>React</li>
+        </ul>
+      </section>
+
+      <section class="section-panel">
+        <h2 id="projects">My Projects</h2>
+
+        <div class="section-block">
+          <h3>Advanced 2D Java Game</h3>
+          <ul>
+            <li>Took advantage of OOP programming through advanced class structures, re-using these for later, adding to the modularity of the code</li>
+            <li>Created enemy AI to track the player and follow them in the event of an ongoing battle</li>
+            <li>Made use of encapsulation to allow for multiple levels in-game, not interfering with each other.</li>
+            <li>Applied mathematics to calculate trajectories of bullets and hit-boxes for characters.</li>
+          </ul>
+        </div>
+
+        <hr>
+
+        <div class="section-block">
+          <h3>Python/TKinter destination scheduler GUI</h3>
+          <ul>
+            <li>Implemented a selenium driver to scrape information from relevant webpages and display accurate information for weather, maps and directions.</li>
+            <li>Experimented with a library created for building GUIs in python, allowing me to place, create and link buttons/entries to their relevant actions and types</li>
+          </ul>
+        </div>
+
+        <hr>
+
+        <div class="section-block">
+          <h3>Final Year Project (advanced Android application for learning to drive)</h3>
+          <ul>
+            <li>Created a platform for driving instructors and learners to easily interact with each other.</li>
+            <li>Utilised Kotlin along with Jetpack Compose components to build a complete Android package with a Firebase database, Stripe integration, notifications, messaging, dynamic calendar updates, and much more.</li>
+            <li>Already in-use with my own driving instructor and numerous students.</li>
+          </ul>
+        </div>
+      </section>
+
+      <section class="section-panel">
+        <h2 id="experience">Past Experience</h2>
 
         <div class="section-block">
           <h3>Stratford community food hub, E15 1BG</h3>

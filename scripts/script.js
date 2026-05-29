@@ -138,3 +138,195 @@ if (musicBtn && musicProgress) {
     }, { once: true });
   }
 }
+
+/* ---------- Image Viewer Logic ---------- */
+const imageViewer = document.getElementById('about-image-viewer');
+const viewerImage = document.getElementById('viewer-image');
+const viewerBackBtn = document.getElementById('viewer-back-btn');
+const aboutExpanded = document.querySelector('.about-expanded');
+const imageCards = document.querySelectorAll('.about-card-image');
+
+if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
+  const TRANSITION_DURATION = 500;
+  const FADE_DURATION = 350;
+
+  let activeCard = null;
+  let activeSourceRect = null;
+  let idleSourceRect = null;
+  let isAnimating = false;
+
+  function setViewerBounds(rect) {
+    imageViewer.style.left = `${rect.left}px`;
+    imageViewer.style.top = `${rect.top}px`;
+    imageViewer.style.width = `${rect.width}px`;
+    imageViewer.style.height = `${rect.height}px`;
+    imageViewer.style.transform = `rotate(${rect.rot})`;
+  }
+
+  function getCardRect(card) {
+    const containerRect = aboutExpanded.getBoundingClientRect();
+    const rect = card.getBoundingClientRect();
+    
+    const computedStyle = window.getComputedStyle(card);
+    const matrix = computedStyle.transform;
+    let angle = 0;
+    let scale = 1;
+    
+    if (matrix && matrix !== 'none') {
+        const values = matrix.split('(')[1].split(')')[0].split(',');
+        const a = parseFloat(values[0]);
+        const b = parseFloat(values[1]);
+        angle = Math.round(Math.atan2(b, a) * (180 / Math.PI));
+        scale = Math.sqrt(a * a + b * b);
+    }
+
+    const unrotatedWidth = card.offsetWidth * scale;
+    const unrotatedHeight = card.offsetHeight * scale;
+    
+    const centerX = rect.left + rect.width / 2 - containerRect.left;
+    const centerY = rect.top + rect.height / 2 - containerRect.top;
+    
+    return {
+      left: centerX - unrotatedWidth / 2,
+      top: centerY - unrotatedHeight / 2,
+      width: unrotatedWidth,
+      height: unrotatedHeight,
+      rot: `${angle}deg`,
+      centerX: centerX,
+      centerY: centerY
+    };
+  }
+
+  function getIdleCardRect(card, centerX, centerY) {
+    const unrotatedWidth = card.offsetWidth;
+    const unrotatedHeight = card.offsetHeight;
+    const rot = card.style.getPropertyValue('--rot') || '0deg';
+    
+    return {
+      left: centerX - unrotatedWidth / 2,
+      top: centerY - unrotatedHeight / 2,
+      width: unrotatedWidth,
+      height: unrotatedHeight,
+      rot: rot
+    };
+  }
+
+  function getExpandedRect(sourceRect, naturalWidth, naturalHeight) {
+    const containerRect = aboutExpanded.getBoundingClientRect();
+    
+    // The container has 6rem (96px) of padding on all sides to hide the overflow boundary.
+    const paddingX = 192; // 96px * 2
+    const paddingY = 192; // 96px * 2
+    
+    const maxWidth = containerRect.width - paddingX - 40;
+    const maxHeight = containerRect.height - paddingY - 40;
+    
+    let targetWidth = naturalWidth || sourceRect.width;
+    let targetHeight = naturalHeight || sourceRect.height;
+    
+    if (targetWidth > maxWidth) {
+      targetHeight = targetHeight * (maxWidth / targetWidth);
+      targetWidth = maxWidth;
+    }
+    if (targetHeight > maxHeight) {
+      targetWidth = targetWidth * (maxHeight / targetHeight);
+      targetHeight = maxHeight;
+    }
+    
+    return {
+      left: (containerRect.width - targetWidth) / 2,
+      top: (containerRect.height - targetHeight) / 2,
+      width: targetWidth,
+      height: targetHeight,
+      rot: '0deg'
+    };
+  }
+
+  imageCards.forEach((img) => {
+    img.addEventListener('click', (e) => {
+      e.stopPropagation();
+      if (isAnimating) return;
+
+      const card = img.closest('.about-card');
+      if (!card) return;
+
+      if (!img.complete) return; // Basic safety check
+      isAnimating = true;
+      activeCard = card;
+      activeSourceRect = getCardRect(card);
+      idleSourceRect = getIdleCardRect(card, activeSourceRect.centerX, activeSourceRect.centerY);
+
+      viewerImage.src = img.src;
+      viewerImage.alt = img.alt || 'Expanded View';
+
+      const targetRect = getExpandedRect(activeSourceRect, img.naturalWidth, img.naturalHeight);
+
+      imageViewer.style.transition = 'none';
+      imageViewer.style.visibility = 'visible';
+      setViewerBounds(activeSourceRect);
+
+      void imageViewer.offsetWidth;
+
+      imageViewer.style.transition = [
+        `left ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+        `top ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+        `width ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+        `height ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+        `transform ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+      ].join(', ');
+      setViewerBounds(targetRect);
+      imageViewer.classList.add('is-active');
+      card.classList.add('is-active');
+      aboutExpanded.classList.add('viewer-active');
+
+      setTimeout(() => {
+        isAnimating = false;
+      }, TRANSITION_DURATION);
+    });
+  });
+
+  viewerBackBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    if (isAnimating) return;
+    isAnimating = true;
+
+    if (activeCard && idleSourceRect) {
+      setViewerBounds(idleSourceRect);
+    }
+
+    imageViewer.classList.remove('is-active');
+    aboutExpanded.classList.remove('viewer-active');
+
+    if (activeCard) {
+      activeCard.classList.remove('is-active');
+    }
+
+    setTimeout(() => {
+      imageViewer.style.transition = 'none';
+      imageViewer.style.left = '0px';
+      imageViewer.style.top = '0px';
+      imageViewer.style.width = '0px';
+      imageViewer.style.height = '0px';
+      imageViewer.style.visibility = 'hidden';
+      imageViewer.style.transform = '';
+      viewerImage.src = '';
+      void imageViewer.offsetWidth;
+      imageViewer.style.transition = '';
+      activeCard = null;
+      activeSourceRect = null;
+      idleSourceRect = null;
+      isAnimating = false;
+    }, TRANSITION_DURATION + 50);
+  });
+
+  // Close when clicking outside the expanded image
+  document.addEventListener('click', (e) => {
+    if (imageViewer.classList.contains('is-active') && !isAnimating) {
+      if (e.target !== viewerImage && e.target !== viewerBackBtn && !viewerBackBtn.contains(e.target)) {
+        viewerBackBtn.click();
+      }
+    }
+  });
+}
+
+
