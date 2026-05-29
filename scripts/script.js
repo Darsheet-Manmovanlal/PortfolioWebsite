@@ -1,3 +1,20 @@
+// Smooth scroll with offset for topbar anchor links
+document.addEventListener('DOMContentLoaded', function () {
+  const topBar = document.querySelector('.top-bar');
+  const OFFSET = topBar?.offsetHeight || 80;
+  document.querySelectorAll('.top-links a[href^="#"]').forEach(link => {
+    link.addEventListener('click', function (e) {
+      const targetId = this.getAttribute('href').slice(1);
+      const target = document.getElementById(targetId) || document.querySelector(`[id="${targetId}"]`);
+      if (target) {
+        e.preventDefault();
+        const y = target.getBoundingClientRect().top + window.pageYOffset - OFFSET;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+        history.replaceState(null, '', '#' + targetId);
+      }
+    });
+  });
+});
 /*
   script.js
   - Handles the liquid glass effect on the top links bar.
@@ -89,3 +106,70 @@ if (topBar) {
   window.addEventListener('resize', updateGlassEffect, { passive: true });
   updateGlassEffect();
 }
+
+/* ---------- Search Bar Functionality ---------- */
+const searchBarInput = document.querySelector('.search-bar');
+if (searchBarInput) {
+  function clearHighlights() {
+    document.querySelectorAll('mark.search-highlight').forEach(mark => {
+      const parent = mark.parentNode;
+      parent.replaceChild(document.createTextNode(mark.textContent), mark);
+      parent.normalize();
+    });
+  }
+
+  function highlightText(node, query) {
+    if (!query) return 0;
+    if (node.nodeType === 3) {
+      const text = node.nodeValue;
+      const matchIndex = text.toLowerCase().indexOf(query.toLowerCase());
+      if (matchIndex >= 0) {
+        const mark = document.createElement('mark');
+        mark.className = 'search-highlight';
+        mark.style.backgroundColor = '#fdfd96'; // pastel yellow
+        mark.style.color = '#111';
+        mark.style.borderRadius = '2px';
+        mark.style.padding = '0 2px';
+        
+        const middle = node.splitText(matchIndex);
+        middle.splitText(query.length);
+        
+        const middleClone = middle.cloneNode(true);
+        mark.appendChild(middleClone);
+        middle.parentNode.replaceChild(mark, middle);
+        return 1;
+      }
+    } else if (node.nodeType === 1 && node.childNodes && !/(script|style|mark)/i.test(node.tagName)) {
+      for (let i = 0; i < node.childNodes.length; i++) {
+        i += highlightText(node.childNodes[i], query);
+      }
+    }
+    return 0;
+  }
+
+  searchBarInput.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    clearHighlights();
+    if (query) {
+      // Highlight inside the main container
+      const container = document.querySelector('main.container');
+      if (container) {
+        highlightText(container, query);
+      }
+    }
+  });
+
+  searchBarInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const firstHighlight = document.querySelector('mark.search-highlight');
+      if (firstHighlight) {
+        const topBar = document.querySelector('.top-bar');
+        const OFFSET = topBar ? topBar.offsetHeight : 80;
+        const y = firstHighlight.getBoundingClientRect().top + window.pageYOffset - OFFSET - 20;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+  });
+}
+
