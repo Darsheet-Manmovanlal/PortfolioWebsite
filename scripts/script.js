@@ -107,7 +107,6 @@ if (topBar) {
   updateGlassEffect();
 }
 
-
 /* ---------- Music Player Toggle ---------- */
 const musicBtn = document.getElementById('about-music-play');
 const musicProgress = document.getElementById('about-music-progress');
@@ -157,69 +156,6 @@ if (musicBtn && musicProgress) {
   }
 }
 
-<<<<<<< HEAD
-/* ---------- Search Bar Functionality ---------- */
-const searchBarInput = document.querySelector('.search-bar');
-if (searchBarInput) {
-  function clearHighlights() {
-    document.querySelectorAll('mark.search-highlight').forEach(mark => {
-      const parent = mark.parentNode;
-      parent.replaceChild(document.createTextNode(mark.textContent), mark);
-      parent.normalize();
-    });
-  }
-
-  function highlightText(node, query) {
-    if (!query) return 0;
-    if (node.nodeType === 3) {
-      const text = node.nodeValue;
-      const matchIndex = text.toLowerCase().indexOf(query.toLowerCase());
-      if (matchIndex >= 0) {
-        const mark = document.createElement('mark');
-        mark.className = 'search-highlight';
-        mark.style.backgroundColor = '#fdfd96'; // pastel yellow
-        mark.style.color = '#111';
-        mark.style.borderRadius = '2px';
-        mark.style.padding = '0 2px';
-        
-        const middle = node.splitText(matchIndex);
-        middle.splitText(query.length);
-        
-        const middleClone = middle.cloneNode(true);
-        mark.appendChild(middleClone);
-        middle.parentNode.replaceChild(mark, middle);
-        return 1;
-      }
-    } else if (node.nodeType === 1 && node.childNodes && !/(script|style|mark)/i.test(node.tagName)) {
-      for (let i = 0; i < node.childNodes.length; i++) {
-        i += highlightText(node.childNodes[i], query);
-      }
-    }
-    return 0;
-  }
-
-  searchBarInput.addEventListener('input', (e) => {
-    const query = e.target.value.trim();
-    clearHighlights();
-    if (query) {
-      // Highlight inside the main container
-      const container = document.querySelector('main.container');
-      if (container) {
-        highlightText(container, query);
-      }
-    }
-  });
-
-  searchBarInput.addEventListener('keydown', (e) => {
-    if (e.key === 'Enter') {
-      e.preventDefault();
-      const firstHighlight = document.querySelector('mark.search-highlight');
-      if (firstHighlight) {
-        const topBar = document.querySelector('.top-bar');
-        const OFFSET = topBar ? topBar.offsetHeight : 80;
-        const y = firstHighlight.getBoundingClientRect().top + window.pageYOffset - OFFSET - 20;
-        window.scrollTo({ top: y, behavior: 'smooth' });
-=======
 /* ---------- Image Viewer Logic ---------- */
 const imageViewer = document.getElementById('about-image-viewer');
 const viewerImage = document.getElementById('viewer-image');
@@ -405,13 +341,47 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
     if (imageViewer.classList.contains('is-active') && !isAnimating) {
       if (e.target !== viewerImage && e.target !== viewerBackBtn && !viewerBackBtn.contains(e.target)) {
         viewerBackBtn.click();
->>>>>>> feature/about-section-hover
       }
     }
   });
 }
 
-<<<<<<< HEAD
-=======
+/* ---------- Search Bar Functionality ---------- */
+const searchBarInput = document.querySelector('.search-bar');
+if (searchBarInput) {
+  const searchableElements = document.querySelectorAll('.section-block, .content-list li, .about-section p');
+  
+  // Store original HTML to restore when query changes
+  const originalHTMLs = new Map();
+  searchableElements.forEach((el, index) => {
+    originalHTMLs.set(index, el.innerHTML);
+  });
 
->>>>>>> feature/about-section-hover
+  searchBarInput.addEventListener('input', (e) => {
+    const query = e.target.value.trim();
+    
+    searchableElements.forEach((el, index) => {
+      const orig = originalHTMLs.get(index);
+      el.innerHTML = orig;
+      
+      if (query !== '') {
+        const regex = new RegExp(`(${query.replace(/[.*+?^${}()|[\\]\\\\]/g, '\\\\$&')})(?![^<]*>)`, 'gi');
+        el.innerHTML = orig.replace(regex, '<span class="search-highlight">$1</span>');
+      }
+    });
+  });
+
+  searchBarInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') {
+      e.preventDefault();
+      const firstMatch = document.querySelector('.search-highlight');
+      if (firstMatch) {
+        const topBar = document.querySelector('.top-bar');
+        const baseOffset = topBar?.offsetHeight || 80;
+        const OFFSET = baseOffset + 5; // Extra padding so it doesn't touch the topbar
+        const y = firstMatch.getBoundingClientRect().top + window.pageYOffset - OFFSET;
+        window.scrollTo({ top: y, behavior: 'smooth' });
+      }
+    }
+  });
+}
