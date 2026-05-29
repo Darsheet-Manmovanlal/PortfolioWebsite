@@ -147,12 +147,118 @@ if (musicBtn && musicProgress) {
     }
   });
 
-  /* Expand permanently on first hover */
+  /* Expand permanently on scroll past hero */
   const aboutSection = document.getElementById('about-section');
-  if (aboutSection) {
-    aboutSection.addEventListener('mouseenter', () => {
-      aboutSection.classList.add('is-expanded');
-    }, { once: true });
+  const heroSection = document.querySelector('.hero');
+  const fixedDecorations = document.getElementById('fixed-decorations');
+  const aboutDecorations = document.getElementById('about-decorations');
+  const skillsSection = document.getElementById('skills');
+
+  if (aboutSection && heroSection && topBar) {
+    const checkExpand = () => {
+      const topBarBottom = window.scrollY + topBar.offsetHeight;
+      const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+      if (topBarBottom >= heroBottom) {
+        aboutSection.classList.add('is-expanded');
+        if (fixedDecorations) fixedDecorations.classList.add('is-active');
+        window.removeEventListener('scroll', checkExpand);
+        startDynamicArrows();
+      }
+    };
+    window.addEventListener('scroll', checkExpand, { passive: true });
+    checkExpand(); // Check initially on load
+    
+    // Fade out logic when reaching skills section or scrolling back up
+    const skillsPanel = skillsSection ? skillsSection.closest('.section-panel') : null;
+    const skillsListItems = skillsPanel ? skillsPanel.querySelectorAll('li') : [];
+    const lastSkill = skillsListItems.length > 0 ? skillsListItems[skillsListItems.length - 1] : null;
+
+    const checkFade = () => {
+      if (!fixedDecorations || !aboutDecorations) return;
+      
+      let shouldFadeOut = false;
+      const topBarBottom = window.scrollY + topBar.offsetHeight;
+      const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+
+      // Scroll up past hero section bottom
+      if (topBarBottom < heroBottom) {
+        shouldFadeOut = true;
+      }
+      
+      // Scroll down past last skill
+      if (lastSkill) {
+        const lastSkillRect = lastSkill.getBoundingClientRect();
+        if (lastSkillRect.bottom < window.innerHeight - 50) {
+          shouldFadeOut = true;
+        }
+      }
+
+      if (shouldFadeOut) {
+        fixedDecorations.classList.add('fade-out');
+        aboutDecorations.classList.add('fade-out');
+      } else {
+        fixedDecorations.classList.remove('fade-out');
+        aboutDecorations.classList.remove('fade-out');
+      }
+    };
+    window.addEventListener('scroll', checkFade, { passive: true });
+    checkFade();
+  }
+
+  function startDynamicArrows() {
+    const leftImg = document.getElementById('fixed-img-left');
+    const rightImg = document.getElementById('fixed-img-right');
+    const leftText = document.getElementById('decor-text-left');
+    const rightText = document.getElementById('decor-text-right');
+    const pathLeft = document.getElementById('dynamic-arrow-left');
+    const headLeft = document.getElementById('dynamic-arrow-head-left');
+    const pathRight = document.getElementById('dynamic-arrow-right');
+    const headRight = document.getElementById('dynamic-arrow-head-right');
+
+    if (!leftImg || !leftText || !pathLeft || !headLeft) return;
+
+    function draw() {
+      const leftImgRect = leftImg.getBoundingClientRect();
+      const leftTextRect = leftText.getBoundingClientRect();
+      const rightImgRect = rightImg.getBoundingClientRect();
+      const rightTextRect = rightText.getBoundingClientRect();
+
+      if (leftImgRect.width === 0 || leftTextRect.width === 0) {
+        requestAnimationFrame(draw);
+        return;
+      }
+
+      // Left arrow
+      const lx1 = leftImgRect.right - 10; // Start slightly inside the image to look like it comes from him
+      const ly1 = leftImgRect.top + 80;
+      const lx2 = leftTextRect.left + leftTextRect.width / 2;
+      const ly2 = leftTextRect.bottom + 5;
+      
+      const lcx1 = lx1 + 20;
+      const lcy1 = ly1 - 100;
+      const lcx2 = lx2 - 20;
+      const lcy2 = ly2 + 80;
+
+      pathLeft.setAttribute('d', `M ${lx1} ${ly1} C ${lcx1} ${lcy1} ${lcx2} ${lcy2} ${lx2} ${ly2}`);
+      headLeft.setAttribute('d', `M ${lx2 - 8} ${ly2 + 12} L ${lx2} ${ly2} L ${lx2 + 12} ${ly2 + 10}`);
+
+      // Right arrow
+      const rx1 = rightImgRect.left + 60;
+      const ry1 = rightImgRect.top + 80;
+      const rx2 = rightTextRect.left + rightTextRect.width / 2;
+      const ry2 = rightTextRect.bottom + 5;
+
+      const rcx1 = rx1 - 40;
+      const rcy1 = ry1 - 120;
+      const rcx2 = rx2 + 40;
+      const rcy2 = ry2 + 60;
+
+      pathRight.setAttribute('d', `M ${rx1} ${ry1} C ${rcx1} ${rcy1} ${rcx2} ${rcy2} ${rx2} ${ry2}`);
+      headRight.setAttribute('d', `M ${rx2 + 12} ${ry2 + 10} L ${rx2} ${ry2} L ${rx2 - 8} ${ry2 + 12}`);
+
+      requestAnimationFrame(draw);
+    }
+    draw();
   }
 }
 
