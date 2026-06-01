@@ -107,159 +107,169 @@ if (topBar) {
   updateGlassEffect();
 }
 
-/* ---------- Music Player Toggle ---------- */
-const musicBtn = document.getElementById('about-music-play');
-const musicProgress = document.getElementById('about-music-progress');
+/* ---------- About Section Scroll Animations ---------- */
+const aboutSection = document.getElementById('about-section');
+const heroSection = document.querySelector('.hero');
+const fixedDecorations = document.getElementById('fixed-decorations');
+const aboutDecorations = document.getElementById('about-decorations');
+const skillsSection = document.getElementById('skills');
 
-if (musicBtn && musicProgress) {
-  let playing = false;
-  let progressVal = 0;
-  let progressInterval = null;
+if (aboutSection && heroSection && topBar) {
+  const skillsPanel = skillsSection ? skillsSection.closest('.section-panel') : null;
+  const skillsListItems = skillsPanel ? skillsPanel.querySelectorAll('li') : [];
+  const lastSkill = skillsListItems.length > 0 ? skillsListItems[skillsListItems.length - 1] : null;
 
-  const startProgress = () => {
-    if (progressInterval) return;
-    progressInterval = setInterval(() => {
-      progressVal = Math.min(100, progressVal + 0.5);
-      musicProgress.style.width = progressVal + '%';
-      if (progressVal >= 100) {
-        stopProgress();
-        musicBtn.classList.remove('is-playing');
-        playing = false;
-        progressVal = 0;
-        musicProgress.style.width = '0%';
+  let arrowsInitialized = false;
+
+  const handleScrollAnimations = () => {
+    if (!aboutSection || !heroSection || !topBar) return;
+
+    const topBarBottom = window.scrollY + topBar.offsetHeight;
+    const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+
+    const pastHero = topBarBottom >= heroBottom;
+    let pastSkills = false;
+
+    // Scroll down past last skill
+    if (lastSkill) {
+      const lastSkillRect = lastSkill.getBoundingClientRect();
+      if (lastSkillRect.bottom < window.innerHeight - 50) {
+        pastSkills = true;
       }
-    }, 200);
-  };
-
-  const stopProgress = () => {
-    clearInterval(progressInterval);
-    progressInterval = null;
-  };
-
-  musicBtn.addEventListener('click', (e) => {
-    e.stopPropagation();
-    playing = !playing;
-    musicBtn.classList.toggle('is-playing', playing);
-    if (playing) {
-      startProgress();
-    } else {
-      stopProgress();
     }
-  });
 
-  /* Expand permanently on scroll past hero */
-  const aboutSection = document.getElementById('about-section');
-  const heroSection = document.querySelector('.hero');
-  const fixedDecorations = document.getElementById('fixed-decorations');
-  const aboutDecorations = document.getElementById('about-decorations');
-  const skillsSection = document.getElementById('skills');
-
-  if (aboutSection && heroSection && topBar) {
-    const checkExpand = () => {
-      const topBarBottom = window.scrollY + topBar.offsetHeight;
-      const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-      if (topBarBottom >= heroBottom) {
+    // About section blob expansion (expands once and stays expanded)
+    if (pastHero) {
+      if (!aboutSection.classList.contains('is-expanded')) {
         aboutSection.classList.add('is-expanded');
-        if (fixedDecorations) fixedDecorations.classList.add('is-active');
-        window.removeEventListener('scroll', checkExpand);
+
+        // Re-evaluate scroll logic during the CSS transition (800ms)
+        // so that elements pushed down by the expansion update correctly
+        const startTime = performance.now();
+        const tick = (now) => {
+          handleScrollAnimations();
+          if (now - startTime < 1000) {
+            requestAnimationFrame(tick);
+          }
+        };
+        requestAnimationFrame(tick);
+      }
+
+      // Ensure arrows are started only once when in view
+      if (!arrowsInitialized && fixedDecorations) {
         startDynamicArrows();
+        arrowsInitialized = true;
       }
-    };
-    window.addEventListener('scroll', checkExpand, { passive: true });
-    checkExpand(); // Check initially on load
-    
-    // Fade out logic when reaching skills section or scrolling back up
-    const skillsPanel = skillsSection ? skillsSection.closest('.section-panel') : null;
-    const skillsListItems = skillsPanel ? skillsPanel.querySelectorAll('li') : [];
-    const lastSkill = skillsListItems.length > 0 ? skillsListItems[skillsListItems.length - 1] : null;
+    }
 
-    const checkFade = () => {
-      if (!fixedDecorations || !aboutDecorations) return;
-      
-      let shouldFadeOut = false;
-      const topBarBottom = window.scrollY + topBar.offsetHeight;
-      const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-
-      // Scroll up past hero section bottom
-      if (topBarBottom < heroBottom) {
-        shouldFadeOut = true;
-      }
-      
-      // Scroll down past last skill
-      if (lastSkill) {
-        const lastSkillRect = lastSkill.getBoundingClientRect();
-        if (lastSkillRect.bottom < window.innerHeight - 50) {
-          shouldFadeOut = true;
-        }
-      }
-
-      if (shouldFadeOut) {
-        fixedDecorations.classList.add('fade-out');
-        aboutDecorations.classList.add('fade-out');
-      } else {
+    // Decorations visibility (hides if past skills)
+    if (!pastSkills) {
+      if (fixedDecorations) {
         fixedDecorations.classList.remove('fade-out');
+      }
+      if (aboutDecorations) {
         aboutDecorations.classList.remove('fade-out');
       }
-    };
-    window.addEventListener('scroll', checkFade, { passive: true });
-    checkFade();
-  }
-
-  function startDynamicArrows() {
-    const leftImg = document.getElementById('fixed-img-left');
-    const rightImg = document.getElementById('fixed-img-right');
-    const leftText = document.getElementById('decor-text-left');
-    const rightText = document.getElementById('decor-text-right');
-    const pathLeft = document.getElementById('dynamic-arrow-left');
-    const headLeft = document.getElementById('dynamic-arrow-head-left');
-    const pathRight = document.getElementById('dynamic-arrow-right');
-    const headRight = document.getElementById('dynamic-arrow-head-right');
-
-    if (!leftImg || !leftText || !pathLeft || !headLeft) return;
-
-    function draw() {
-      const leftImgRect = leftImg.getBoundingClientRect();
-      const leftTextRect = leftText.getBoundingClientRect();
-      const rightImgRect = rightImg.getBoundingClientRect();
-      const rightTextRect = rightText.getBoundingClientRect();
-
-      if (leftImgRect.width === 0 || leftTextRect.width === 0) {
-        requestAnimationFrame(draw);
-        return;
+    } else {
+      if (fixedDecorations) {
+        fixedDecorations.classList.add('fade-out');
       }
-
-      // Left arrow
-      const lx1 = leftImgRect.right - 10; // Start slightly inside the image to look like it comes from him
-      const ly1 = leftImgRect.top + 80;
-      const lx2 = leftTextRect.left + leftTextRect.width / 2;
-      const ly2 = leftTextRect.bottom + 5;
-      
-      const lcx1 = lx1 + 20;
-      const lcy1 = ly1 - 100;
-      const lcx2 = lx2 - 20;
-      const lcy2 = ly2 + 80;
-
-      pathLeft.setAttribute('d', `M ${lx1} ${ly1} C ${lcx1} ${lcy1} ${lcx2} ${lcy2} ${lx2} ${ly2}`);
-      headLeft.setAttribute('d', `M ${lx2 - 8} ${ly2 + 12} L ${lx2} ${ly2} L ${lx2 + 12} ${ly2 + 10}`);
-
-      // Right arrow
-      const rx1 = rightImgRect.left + 60;
-      const ry1 = rightImgRect.top + 80;
-      const rx2 = rightTextRect.left + rightTextRect.width / 2;
-      const ry2 = rightTextRect.bottom + 5;
-
-      const rcx1 = rx1 - 40;
-      const rcy1 = ry1 - 120;
-      const rcx2 = rx2 + 40;
-      const rcy2 = ry2 + 60;
-
-      pathRight.setAttribute('d', `M ${rx1} ${ry1} C ${rcx1} ${rcy1} ${rcx2} ${rcy2} ${rx2} ${ry2}`);
-      headRight.setAttribute('d', `M ${rx2 + 12} ${ry2 + 10} L ${rx2} ${ry2} L ${rx2 - 8} ${ry2 + 12}`);
-
-      requestAnimationFrame(draw);
+      if (aboutDecorations) {
+        aboutDecorations.classList.add('fade-out');
+      }
     }
-    draw();
+  };
+
+  window.addEventListener('scroll', handleScrollAnimations, { passive: true });
+  handleScrollAnimations();
+}
+
+function startDynamicArrows() {
+  const leftImg = document.getElementById('fixed-img-left');
+  const rightImg = document.getElementById('fixed-img-right');
+  const leftText = document.getElementById('decor-text-left');
+  const rightText = document.getElementById('decor-text-right');
+  const pathLeft = document.getElementById('dynamic-arrow-left');
+  const headLeft = document.getElementById('dynamic-arrow-head-left');
+  const pathRight = document.getElementById('dynamic-arrow-right');
+  const headRight = document.getElementById('dynamic-arrow-head-right');
+
+  if (!leftImg || !leftText || !pathLeft || !headLeft) return;
+
+  function draw() {
+    const leftImgRect = leftImg.getBoundingClientRect();
+    const rightImgRect = rightImg.getBoundingClientRect();
+
+    const aboutSection = document.getElementById('about-section');
+    const heroSection = document.querySelector('.hero');
+
+    if (aboutSection && heroSection) {
+      const aboutRect = aboutSection.getBoundingClientRect();
+      const heroRect = heroSection.getBoundingClientRect();
+
+      const naturalBottom = aboutRect.bottom - 400;
+      const textHeight = 80;
+      const naturalTop = naturalBottom - textHeight;
+
+      const safeHeroBottom = heroRect.bottom + 20;
+      const leftSafeImgTop = leftImgRect.top - 60;
+      const rightSafeImgTop = rightImgRect.top - 60;
+
+      let leftOffsetY = 0;
+      let rightOffsetY = 0;
+
+      if (naturalBottom > leftSafeImgTop) leftOffsetY = leftSafeImgTop - naturalBottom;
+      if (naturalBottom > rightSafeImgTop) rightOffsetY = rightSafeImgTop - naturalBottom;
+
+      const maxLeftOffsetY = safeHeroBottom - naturalTop;
+      if (leftOffsetY < maxLeftOffsetY) leftOffsetY = maxLeftOffsetY;
+
+      const maxRightOffsetY = safeHeroBottom - naturalTop;
+      if (rightOffsetY < maxRightOffsetY) rightOffsetY = maxRightOffsetY;
+
+      leftText.style.transform = `translateY(${leftOffsetY < 0 ? leftOffsetY : 0}px) rotate(-4deg)`;
+      rightText.style.transform = `translateY(${rightOffsetY < 0 ? rightOffsetY : 0}px) rotate(3deg)`;
+    }
+
+    const leftTextRect = leftText.getBoundingClientRect();
+    const rightTextRect = rightText.getBoundingClientRect();
+
+    if (leftImgRect.width === 0 || leftTextRect.width === 0) {
+      requestAnimationFrame(draw);
+      return;
+    }
+
+    // Left arrow
+    const lx1 = leftImgRect.right - 10; // Start slightly inside the image to look like it comes from him
+    const ly1 = leftImgRect.top + 80;
+    const lx2 = leftTextRect.left + leftTextRect.width / 2;
+    const ly2 = leftTextRect.bottom + 5;
+
+    const lcx1 = lx1 + 20;
+    const lcy1 = ly1 - 100;
+    const lcx2 = lx2 - 20;
+    const lcy2 = ly2 + 80;
+
+    pathLeft.setAttribute('d', `M ${lx1} ${ly1} C ${lcx1} ${lcy1} ${lcx2} ${lcy2} ${lx2} ${ly2}`);
+    headLeft.setAttribute('d', `M ${lx2 - 8} ${ly2 + 12} L ${lx2} ${ly2} L ${lx2 + 12} ${ly2 + 10}`);
+
+    // Right arrow
+    const rx1 = rightImgRect.left + 60;
+    const ry1 = rightImgRect.top + 80;
+    const rx2 = rightTextRect.left + rightTextRect.width / 2;
+    const ry2 = rightTextRect.bottom + 5;
+
+    const rcx1 = rx1 - 40;
+    const rcy1 = ry1 - 120;
+    const rcx2 = rx2 + 40;
+    const rcy2 = ry2 + 60;
+
+    pathRight.setAttribute('d', `M ${rx1} ${ry1} C ${rcx1} ${rcy1} ${rcx2} ${rcy2} ${rx2} ${ry2}`);
+    headRight.setAttribute('d', `M ${rx2 + 12} ${ry2 + 10} L ${rx2} ${ry2} L ${rx2 - 8} ${ry2 + 12}`);
+
+    requestAnimationFrame(draw);
   }
+  draw();
 }
 
 /* ---------- Image Viewer Logic ---------- */
@@ -268,15 +278,78 @@ const viewerImage = document.getElementById('viewer-image');
 const viewerBackBtn = document.getElementById('viewer-back-btn');
 const aboutExpanded = document.querySelector('.about-expanded');
 const imageCards = document.querySelectorAll('.about-card-image');
+const musicCard = document.getElementById('about-music-card');
+const musicPreviewPlay = document.getElementById('about-music-play');
+
+const viewerMusic = document.getElementById('viewer-music');
+const musicAudio = document.getElementById('about-music-audio');
+const viewerMusicPlay = document.getElementById('viewer-music-play');
+const viewerMusicTrack = document.getElementById('viewer-music-track');
+const viewerMusicPlayhead = document.getElementById('viewer-music-playhead');
+const viewerMusicCurrent = document.getElementById('viewer-music-current');
+const viewerMusicDuration = document.getElementById('viewer-music-duration');
+const viewerMusicPrevious = document.getElementById('viewer-music-prev');
+const viewerMusicNext = document.getElementById('viewer-music-next');
+const viewerMusicSongPill = document.getElementById('viewer-music-song-pill');
+const musicTitleElements = document.querySelectorAll('.viewer-music-title');
+const musicKickerElements = document.querySelectorAll('.viewer-music-kicker');
+const musicVolumeControls = document.querySelectorAll('.viewer-music-volume');
+const musicVolumeButtons = document.querySelectorAll('.viewer-music-volume-btn');
+const musicVolumeSliders = document.querySelectorAll('.viewer-music-volume-slider');
+const musicPreviewVolume = document.querySelector('.viewer-music-volume-preview');
+const viewerMusicVolume = document.querySelector('.viewer-music-volume-expanded');
 
 if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
   const TRANSITION_DURATION = 500;
-  const FADE_DURATION = 350;
+  const DEFAULT_MUSIC_DURATION_SECONDS = 180;
+  const DEFAULT_MIN_VISIBLE_GAP_PIXELS = 8;
+  const DEFAULT_EDGE_INSET_SECONDS = 4;
+  const MUSIC_CLOSE_TARGET_OFFSET_X = 0;
+  const MUSIC_CLOSE_TARGET_OFFSET_Y = 0;
 
   let activeCard = null;
+  let activeMode = null;
   let activeSourceRect = null;
   let idleSourceRect = null;
   let isAnimating = false;
+  let activeSongIndex = 0;
+
+  // Add future covers here; navigation buttons and dots render from this bank.
+  const musicSongs = musicAudio ? [
+    {
+      src: musicAudio.getAttribute('src') || '',
+      title: musicAudio.dataset.title || "Don't say that|you love me -|Jin (cover)",
+      kicker: musicAudio.dataset.kicker || 'BANDLAB COVER',
+      durationSeconds: musicAudio.dataset.durationSeconds || String(DEFAULT_MUSIC_DURATION_SECONDS),
+      minVisibleGapPixels: musicAudio.dataset.minVisibleGapPixels || String(DEFAULT_MIN_VISIBLE_GAP_PIXELS),
+      edgeInsetSeconds: musicAudio.dataset.edgeInsetSeconds || String(DEFAULT_EDGE_INSET_SECONDS),
+      segments: musicAudio.dataset.segments || '[]'
+    },
+    {
+      src: 'audio/intoTheSun.mp4',
+      title: 'INTO THE SUN -|BTS|(cover)',
+      kicker: 'BANDLAB COVER',
+      durationSeconds: '199',
+      minVisibleGapPixels: String(DEFAULT_MIN_VISIBLE_GAP_PIXELS),
+      edgeInsetSeconds: String(DEFAULT_EDGE_INSET_SECONDS),
+      segments: JSON.stringify([
+        { start: 11, end: 74, label: 'Darsheet', color: '#f59e0b' },
+        { start: 74, end: 108, label: 'No Vocals', color: 'rgba(255, 255, 255, 0.15)' },
+        { start: 108, end: 199, label: 'Darsheet', color: '#f59e0b' }
+      ])
+    },
+    {
+      src: 'audio/thousandMiles.mp4',
+      title: 'THOUSAND MILES -|The Kid Laroi|(cover)',
+      kicker: 'BANDLAB COVER',
+      durationSeconds: '166',
+      minVisibleGapPixels: String(DEFAULT_MIN_VISIBLE_GAP_PIXELS),
+      edgeInsetSeconds: String(DEFAULT_EDGE_INSET_SECONDS),
+      segments: JSON.stringify([
+        { start: 13, end: 166, label: 'Darsheet', color: '#f59e0b' }
+      ])
+    }
+  ] : [];
 
   function setViewerBounds(rect) {
     imageViewer.style.left = `${rect.left}px`;
@@ -341,8 +414,8 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
     const paddingX = 192; // 96px * 2
     const paddingY = 192; // 96px * 2
     
-    const maxWidth = containerRect.width - paddingX - 40;
-    const maxHeight = containerRect.height - paddingY - 40;
+    const maxWidth = Math.max(sourceRect.width, containerRect.width - paddingX - 40);
+    const maxHeight = Math.max(sourceRect.height, containerRect.height - paddingY - 40);
     
     let targetWidth = naturalWidth || sourceRect.width;
     let targetHeight = naturalHeight || sourceRect.height;
@@ -365,6 +438,668 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
     };
   }
 
+  function getMusicExpandedRect() {
+    const containerRect = aboutExpanded.getBoundingClientRect();
+    const paddingX = 192;
+    const paddingY = 192;
+    const maxWidth = Math.max(260, containerRect.width - paddingX - 40);
+    const maxHeight = Math.max(420, containerRect.height - paddingY - 40);
+    const targetRatio = 9 / 14;
+
+    let targetHeight = Math.min(maxHeight, 620);
+    let targetWidth = targetHeight * targetRatio;
+
+    if (targetWidth > maxWidth) {
+      targetWidth = maxWidth;
+      targetHeight = targetWidth / targetRatio;
+    }
+
+    return {
+      left: (containerRect.width - targetWidth) / 2,
+      top: (containerRect.height - targetHeight) / 2,
+      width: targetWidth,
+      height: targetHeight,
+      rot: '0deg'
+    };
+  }
+
+  function setViewerMode(mode) {
+    activeMode = mode;
+    imageViewer.classList.toggle('is-music-mode', mode === 'music');
+    viewerMusic?.setAttribute('aria-hidden', mode === 'music' ? 'false' : 'true');
+  }
+
+  function animateViewerOpen(card, targetRect) {
+    isAnimating = true;
+    activeCard = card;
+    let sourceRect = getCardRect(card);
+    activeSourceRect = {
+      left: sourceRect.left,
+      top: sourceRect.top,
+      width: sourceRect.width,
+      height: sourceRect.height,
+      rot: sourceRect.rot
+    };
+    idleSourceRect = getIdleCardRect(card, sourceRect.centerX, sourceRect.centerY);
+
+    imageViewer.style.transition = 'none';
+    imageViewer.style.visibility = 'visible';
+    setViewerBounds(activeSourceRect);
+
+    void imageViewer.offsetWidth;
+
+    imageViewer.style.transition = [
+      `left ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `top ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `width ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `height ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `transform ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `box-shadow ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `opacity ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+    ].join(', ');
+    setViewerBounds(targetRect);
+    imageViewer.classList.add('is-active');
+    imageViewer.classList.add('img-visible');
+    card.classList.add('is-active');
+    aboutExpanded.classList.add('viewer-active');
+
+    setTimeout(() => {
+      isAnimating = false;
+    }, TRANSITION_DURATION);
+  }
+
+  function getExpandedVolumeRect(targetRect) {
+    if (!aboutExpanded) return null;
+
+    const containerRect = aboutExpanded.getBoundingClientRect();
+    const rootFontSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16;
+    const top = 0.75 * rootFontSize;
+    const right = 0.75 * rootFontSize;
+    const height = 2.2 * rootFontSize;
+    const buttonSize = 2 * rootFontSize;
+    const sliderWidth = 5.75 * rootFontSize;
+    const gap = 0.44 * rootFontSize;
+    const paddingLeft = 0.25 * rootFontSize;
+    const paddingRight = 0.75 * rootFontSize;
+    const thumbSize = 0.78 * rootFontSize;
+    const width = buttonSize + sliderWidth + gap + paddingLeft + paddingRight + 2; // +2 for left/right 1px borders
+    const left = containerRect.left + targetRect.left + targetRect.width - right - width;
+
+    return {
+      left: Math.round(left),
+      top: Math.round(containerRect.top + targetRect.top + top) + 1,
+      width: Math.round(width),
+      height: Math.round(height),
+      buttonSize,
+      sliderWidth,
+      thumbSize,
+      paddingLeft,
+      paddingRight,
+      gap,
+      rot: '0deg'
+    };
+  }
+
+  function createVolumeFlightClone() {
+    if (!viewerMusicVolume) return null;
+
+    const clone = viewerMusicVolume.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
+    clone.classList.add('viewer-music-volume-flight');
+    clone.classList.remove('viewer-music-volume-expanded');
+    clone.querySelectorAll('button, input').forEach((element) => {
+      element.setAttribute('tabindex', '-1');
+    });
+    return clone;
+  }
+
+  function animateVolumeControlBetween(startRect, endRect, options = {}) {
+    if (!musicPreviewVolume || !viewerMusicVolume || !startRect || !endRect) return;
+
+    const clone = createVolumeFlightClone();
+    if (!clone) return;
+
+    const rootFontSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16;
+
+    const from = {
+      left: startRect.left,
+      top: startRect.top,
+      width: startRect.width,
+      height: startRect.height,
+      buttonSize: startRect.buttonSize || (2 * rootFontSize),
+      sliderWidth: startRect.sliderWidth || (5.75 * rootFontSize),
+      thumbSize: startRect.thumbSize || (0.78 * rootFontSize),
+      paddingLeft: startRect.paddingLeft || 0,
+      paddingRight: startRect.paddingRight || 0,
+      gap: startRect.gap || (0.44 * rootFontSize),
+      rot: startRect.rot || '0deg'
+    };
+    const to = {
+      left: endRect.left,
+      top: endRect.top,
+      width: endRect.width,
+      height: endRect.height,
+      buttonSize: endRect.buttonSize || (2 * rootFontSize),
+      sliderWidth: endRect.sliderWidth || (5.75 * rootFontSize),
+      thumbSize: endRect.thumbSize || (0.78 * rootFontSize),
+      paddingLeft: endRect.paddingLeft || 0,
+      paddingRight: endRect.paddingRight || 0,
+      gap: endRect.gap || (0.44 * rootFontSize),
+      rot: endRect.rot || '0deg'
+    };
+
+    clone.style.left = `${from.left + window.scrollX}px`;
+    clone.style.top = `${from.top + window.scrollY}px`;
+    clone.style.width = `${from.width}px`;
+    clone.style.height = `${from.height}px`;
+    clone.style.setProperty('--btn-size', `${from.buttonSize}px`);
+    clone.style.setProperty('--slider-width', `${from.sliderWidth}px`);
+    clone.style.setProperty('--thumb-size', `${from.thumbSize}px`);
+    const toPadding = options.toCompact ? '0px' : `0px ${to.paddingRight}px 0px ${to.paddingLeft}px`;
+    clone.style.padding = options.fromCompact ? '0px' : `0px ${from.paddingRight}px 0px ${from.paddingLeft}px`;
+    clone.style.setProperty('--flight-gap', `${from.gap}px`);
+    clone.style.transform = `rotate(${from.rot})`;
+
+    if (options.fromCompact) {
+      clone.classList.add('is-compact-flight');
+    } else {
+      clone.classList.remove('is-compact-flight');
+    }
+
+    document.body.appendChild(clone);
+    syncMusicVolumeControls();
+
+    musicPreviewVolume.classList.add('is-flight-hidden');
+    viewerMusicVolume.classList.add('is-flight-hidden');
+    void clone.offsetWidth;
+
+    requestAnimationFrame(() => {
+      clone.style.left = `${to.left + window.scrollX}px`;
+      clone.style.top = `${to.top + window.scrollY}px`;
+      clone.style.width = `${to.width}px`;
+      clone.style.height = `${to.height}px`;
+      clone.style.setProperty('--btn-size', `${to.buttonSize}px`);
+      clone.style.setProperty('--slider-width', `${to.sliderWidth}px`);
+      clone.style.setProperty('--thumb-size', `${to.thumbSize}px`);
+      clone.style.padding = toPadding;
+      clone.style.setProperty('--flight-gap', `${to.gap}px`);
+      clone.style.transform = `rotate(${to.rot})`;
+
+      if (options.toCompact) {
+        clone.classList.add('is-compact-flight');
+      } else {
+        clone.classList.remove('is-compact-flight');
+      }
+    });
+
+    setTimeout(() => {
+      clone.remove();
+
+      const prevPreviewTransition = musicPreviewVolume.style.transition;
+      const prevExpandedTransition = viewerMusicVolume.style.transition;
+
+      musicPreviewVolume.style.transition = 'none';
+      viewerMusicVolume.style.transition = 'none';
+
+      musicPreviewVolume.classList.remove('is-flight-hidden');
+      viewerMusicVolume.classList.remove('is-flight-hidden');
+
+      void musicPreviewVolume.offsetWidth;
+      void viewerMusicVolume.offsetWidth;
+
+      musicPreviewVolume.style.transition = prevPreviewTransition;
+      viewerMusicVolume.style.transition = prevExpandedTransition;
+    }, TRANSITION_DURATION + 80);
+  }
+
+  function animateVolumeControlOpen(startRect, targetRect) {
+    const rootFontSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16;
+    let augmentedStartRect = null;
+    if (startRect) {
+      const cx = startRect.left + startRect.width / 2;
+      const cy = startRect.top + startRect.height / 2;
+      augmentedStartRect = {
+        left: cx - rootFontSize,
+        top: cy - rootFontSize,
+        width: 2 * rootFontSize,
+        height: 2 * rootFontSize,
+        buttonSize: 2 * rootFontSize,
+        sliderWidth: 0,
+        rot: startRect.rot || '0deg'
+      };
+    }
+    const endRect = getExpandedVolumeRect(targetRect);
+    animateVolumeControlBetween(augmentedStartRect, endRect, { fromCompact: true, toCompact: false });
+  }
+
+  function getActiveSong() {
+    return musicSongs[activeSongIndex] || musicSongs[0] || null;
+  }
+
+  function syncMusicSongLabels() {
+    const song = getActiveSong();
+    if (!song) return;
+
+    musicTitleElements.forEach((title) => {
+      const lines = song.title
+        .split('|')
+        .map((line) => line.trim())
+        .filter(Boolean);
+      title.replaceChildren();
+      lines.forEach((line, index) => {
+        if (index > 0) {
+          title.appendChild(document.createElement('br'));
+        }
+        title.appendChild(document.createTextNode(line));
+      });
+
+      // Dynamically scale font size so that longer titles fit perfectly and don't wrap/push other elements
+      const isExpanded = title.closest('#viewer-music');
+      const referenceLength = 14;
+      const longestLineLength = Math.max(...lines.map(line => line.length));
+      const scaleFactor = referenceLength / Math.max(referenceLength, longestLineLength);
+
+      if (isExpanded) {
+        const baseFontSize = 9.5; // base cqmin from CSS
+        title.style.fontSize = `${baseFontSize * scaleFactor}cqmin`;
+      } else {
+        const baseFontSize = 0.95; // base rem from CSS
+        title.style.fontSize = `${baseFontSize * scaleFactor}rem`;
+      }
+    });
+
+    musicKickerElements.forEach((kicker) => {
+      kicker.textContent = song.kicker;
+    });
+  }
+
+  function syncMusicNavigationState() {
+    if (!viewerMusicPrevious || !viewerMusicNext) return;
+
+    viewerMusicPrevious.disabled = (activeSongIndex === 0);
+    viewerMusicNext.disabled = (activeSongIndex === musicSongs.length - 1);
+
+    viewerMusicPrevious.setAttribute('aria-label', musicSongs.length <= 1 ? 'Restart previous song' : 'Previous song');
+    viewerMusicNext.setAttribute('aria-label', musicSongs.length <= 1 ? 'Restart next song' : 'Next song');
+  }
+
+  function renderMusicSongDots() {
+    if (!viewerMusicSongPill) return;
+
+    viewerMusicSongPill.innerHTML = '';
+    musicSongs.forEach((song, index) => {
+      const dot = document.createElement('button');
+      dot.className = 'viewer-music-song-dot';
+      dot.type = 'button';
+      dot.classList.toggle('is-active', index === activeSongIndex);
+      dot.setAttribute('aria-label', `Play ${song.title.replace(/\|/g, ' ')}`);
+      dot.setAttribute('aria-current', index === activeSongIndex ? 'true' : 'false');
+      dot.addEventListener('click', (e) => {
+        e.stopPropagation();
+        selectMusicSong(index);
+      });
+      viewerMusicSongPill.appendChild(dot);
+    });
+  }
+
+  function applyMusicSong(song, shouldResume) {
+    if (!musicAudio || !song) return;
+
+    musicAudio.src = song.src;
+    musicAudio.dataset.durationSeconds = song.durationSeconds;
+    musicAudio.dataset.minVisibleGapPixels = song.minVisibleGapPixels;
+    musicAudio.dataset.edgeInsetSeconds = song.edgeInsetSeconds;
+    musicAudio.dataset.segments = song.segments;
+    musicAudio.currentTime = 0;
+
+    syncMusicSongLabels();
+    renderMusicSegments();
+    renderMusicSongDots();
+    updateMusicProgress();
+    syncMusicNavigationState();
+
+    if (shouldResume) {
+      musicAudio.play().catch(() => {
+        syncMusicPlayButtons(false);
+      });
+    } else {
+      syncMusicPlayButtons(false);
+    }
+  }
+
+  function selectMusicSong(index) {
+    if (!musicAudio || musicSongs.length === 0) return;
+
+    const normalizedIndex = ((index % musicSongs.length) + musicSongs.length) % musicSongs.length;
+    const wasPlaying = !musicAudio.paused;
+    activeSongIndex = normalizedIndex;
+    applyMusicSong(getActiveSong(), wasPlaying);
+  }
+
+  function changeMusicSong(direction) {
+    if (musicSongs.length === 0) return;
+    const targetIndex = activeSongIndex + direction;
+    if (targetIndex >= 0 && targetIndex < musicSongs.length) {
+      selectMusicSong(targetIndex);
+    } else if (direction === 1) {
+      // If it ends on the last track, stop playback and reset
+      pauseMusic();
+      musicAudio.currentTime = 0;
+      updateMusicProgress();
+    }
+  }
+
+  function formatMusicTime(seconds) {
+    const safeSeconds = Number.isFinite(seconds) ? Math.max(0, seconds) : 0;
+    const minutes = Math.floor(safeSeconds / 60);
+    const remainingSeconds = Math.floor(safeSeconds % 60).toString().padStart(2, '0');
+    return `${minutes}:${remainingSeconds}`;
+  }
+
+  function getMusicProgressDuration() {
+    const configuredDuration = Number(musicAudio?.dataset.durationSeconds);
+    if (Number.isFinite(configuredDuration) && configuredDuration > 0) {
+      return configuredDuration;
+    }
+
+    if (Number.isFinite(musicAudio?.duration) && musicAudio.duration > 0) {
+      return musicAudio.duration;
+    }
+
+    return DEFAULT_MUSIC_DURATION_SECONDS;
+  }
+
+  function getMusicMinVisibleGapPixels() {
+    const configuredGap = Number(musicAudio?.dataset.minVisibleGapPixels);
+    return Number.isFinite(configuredGap) && configuredGap >= 0
+      ? configuredGap
+      : DEFAULT_MIN_VISIBLE_GAP_PIXELS;
+  }
+
+  function getMusicEdgeInsetSeconds(duration) {
+    const configuredInset = Number(musicAudio?.dataset.edgeInsetSeconds);
+    const edgeInset = Number.isFinite(configuredInset) && configuredInset >= 0
+      ? configuredInset
+      : DEFAULT_EDGE_INSET_SECONDS;
+
+    return Math.min(edgeInset, duration / 2);
+  }
+
+  function getMusicSegments() {
+    if (!musicAudio?.dataset.segments) return [];
+
+    try {
+      return JSON.parse(musicAudio.dataset.segments)
+        .map((segment) => ({
+          start: Number(segment.start),
+          end: Number(segment.end),
+          label: String(segment.label || ''),
+          color: String(segment.color || '#60a5fa')
+        }))
+        .filter((segment) => {
+          return Number.isFinite(segment.start)
+            && Number.isFinite(segment.end)
+            && segment.end > segment.start;
+        })
+        .sort((a, b) => a.start - b.start);
+    } catch {
+      return [];
+    }
+  }
+
+  function getMusicTimelineLayout(duration) {
+    const trackWidth = viewerMusicTrack?.getBoundingClientRect().width || 0;
+    const playheadWidth = viewerMusicPlayhead?.getBoundingClientRect().width || 0;
+    const musicSegments = getMusicSegments();
+    const edgeInsetSeconds = getMusicEdgeInsetSeconds(duration);
+
+    if (trackWidth <= 0) {
+      const edgeInsetPercent = (edgeInsetSeconds / duration) * 100;
+      const timelineWidthPercent = Math.max(0, 100 - (edgeInsetPercent * 2));
+
+      return musicSegments.map((segment) => ({
+        ...segment,
+        isGap: false,
+        left: edgeInsetPercent + ((segment.start / duration) * timelineWidthPercent),
+        width: ((segment.end - segment.start) / duration) * timelineWidthPercent,
+        unit: '%'
+      }));
+    }
+
+    const edgeInsetPixels = ((edgeInsetSeconds / duration) * trackWidth) + (playheadWidth / 2);
+    const timelineWidth = Math.max(0, trackWidth - (edgeInsetPixels * 2));
+    let cursorTime = 0;
+    let fixedGapWidth = 0;
+    let coloredDuration = 0;
+    const minVisibleGapPixels = getMusicMinVisibleGapPixels();
+
+    musicSegments.forEach((segment) => {
+      const gapDuration = Math.max(0, segment.start - cursorTime);
+      if (gapDuration > 0) {
+        fixedGapWidth += Math.max((gapDuration / duration) * timelineWidth, minVisibleGapPixels);
+      }
+      coloredDuration += Math.max(0, segment.end - segment.start);
+      cursorTime = Math.max(cursorTime, segment.end);
+    });
+
+    const trailingGapDuration = Math.max(0, duration - cursorTime);
+    if (trailingGapDuration > 0) {
+      fixedGapWidth += Math.max((trailingGapDuration / duration) * timelineWidth, minVisibleGapPixels);
+    }
+
+    const coloredWidth = Math.max(0, timelineWidth - fixedGapWidth);
+    const layout = [];
+    let cursor = edgeInsetPixels;
+    cursorTime = 0;
+
+    musicSegments.forEach((segment) => {
+      const gapDuration = Math.max(0, segment.start - cursorTime);
+      if (gapDuration > 0) {
+        const gapWidth = Math.max((gapDuration / duration) * timelineWidth, minVisibleGapPixels);
+        layout.push({
+          start: cursorTime,
+          end: segment.start,
+          isGap: true,
+          left: cursor,
+          width: gapWidth,
+          unit: 'px'
+        });
+        cursor += gapWidth;
+      }
+
+      const width = coloredDuration > 0
+        ? ((segment.end - segment.start) / coloredDuration) * coloredWidth
+        : 0;
+      layout.push({
+        ...segment,
+        isGap: false,
+        left: cursor,
+        width,
+        unit: 'px'
+      });
+
+      cursor += width;
+      cursorTime = Math.max(cursorTime, segment.end);
+    });
+
+    const finalGapDuration = Math.max(0, duration - cursorTime);
+    if (finalGapDuration > 0) {
+      layout.push({
+        start: cursorTime,
+        end: duration,
+        isGap: true,
+        left: cursor,
+        width: Math.max((finalGapDuration / duration) * timelineWidth, minVisibleGapPixels),
+        unit: 'px'
+      });
+    }
+
+    return layout;
+  }
+
+  function getMusicVisualProgress(time, duration) {
+    const trackWidth = viewerMusicTrack?.getBoundingClientRect().width || 0;
+    const playheadWidth = viewerMusicPlayhead?.getBoundingClientRect().width || 0;
+    const timelineLayout = getMusicTimelineLayout(duration);
+    const safeTime = Math.min(duration, Math.max(0, time));
+
+    if (timelineLayout.length === 0) {
+      const edgeInsetSeconds = getMusicEdgeInsetSeconds(duration);
+      const edgeInsetPixels = ((edgeInsetSeconds / duration) * trackWidth) + (playheadWidth / 2);
+      const timelineWidth = Math.max(0, trackWidth - (edgeInsetPixels * 2));
+      return trackWidth > 0
+        ? ((edgeInsetPixels + ((safeTime / duration) * timelineWidth)) / trackWidth) * 100
+        : (safeTime / duration) * 100;
+    }
+
+    const item = timelineLayout.find((layoutItem) => safeTime >= layoutItem.start && safeTime <= layoutItem.end);
+
+    if (!item) {
+      return safeTime >= duration ? 100 : 0;
+    }
+
+    const itemDuration = Math.max(1, item.end - item.start);
+    const itemProgress = (safeTime - item.start) / itemDuration;
+
+    if (item.unit === '%') {
+      return item.left + (item.width * itemProgress);
+    }
+
+    return trackWidth > 0
+      ? ((item.left + (item.width * itemProgress)) / trackWidth) * 100
+      : (safeTime / duration) * 100;
+  }
+
+  function getMusicTimeFromVisualPosition(positionX, duration) {
+    const trackWidth = viewerMusicTrack?.getBoundingClientRect().width || 0;
+    const playheadWidth = viewerMusicPlayhead?.getBoundingClientRect().width || 0;
+    const timelineLayout = getMusicTimelineLayout(duration);
+    const edgeInsetSeconds = getMusicEdgeInsetSeconds(duration);
+    const edgeInsetPixels = ((edgeInsetSeconds / duration) * trackWidth) + (playheadWidth / 2);
+    const timelineWidth = Math.max(0, trackWidth - (edgeInsetPixels * 2));
+    const safePosition = Math.min(edgeInsetPixels + timelineWidth, Math.max(edgeInsetPixels, positionX));
+    const item = timelineLayout.find((layoutItem) => {
+      return layoutItem.unit === 'px'
+        && safePosition >= layoutItem.left
+        && safePosition <= layoutItem.left + layoutItem.width;
+    });
+
+    if (!item || trackWidth <= 0) {
+      return ((safePosition - edgeInsetPixels) / Math.max(1, timelineWidth)) * duration;
+    }
+
+    const itemProgress = (safePosition - item.left) / Math.max(1, item.width);
+    return item.start + ((item.end - item.start) * itemProgress);
+  }
+
+  function syncMusicPlayButtons(isPlaying) {
+    [musicPreviewPlay, viewerMusicPlay].forEach((button) => {
+      if (!button) return;
+
+      button.classList.toggle('is-playing', isPlaying);
+      button.setAttribute('aria-label', isPlaying ? 'Pause cover' : 'Play cover');
+    });
+  }
+
+  function syncMusicVolumeControls() {
+    if (!musicAudio) return;
+
+    const volumeLevel = `${Math.round(musicAudio.volume * 100)}%`;
+    const isMuted = musicAudio.muted || musicAudio.volume === 0;
+
+    const vol = musicAudio.muted ? 0 : musicAudio.volume;
+
+    musicVolumeControls.forEach((control) => {
+      control.classList.toggle('is-muted', isMuted);
+      control.classList.toggle('vol-low', vol > 0 && vol <= 0.33);
+      control.classList.toggle('vol-med', vol > 0.33 && vol <= 0.66);
+      control.classList.toggle('vol-high', vol > 0.66);
+      control.style.setProperty('--volume-level', volumeLevel);
+    });
+
+    musicVolumeButtons.forEach((button) => {
+      button.setAttribute('aria-label', isMuted ? 'Unmute cover' : 'Mute cover');
+    });
+
+    musicVolumeSliders.forEach((slider) => {
+      slider.value = musicAudio.volume.toString();
+      slider.style.setProperty('--volume-level', volumeLevel);
+    });
+  }
+
+  function toggleMusicMute() {
+    if (!musicAudio) return;
+
+    if (musicAudio.volume === 0) {
+      musicAudio.volume = 1;
+      musicAudio.muted = false;
+    } else {
+      musicAudio.muted = !musicAudio.muted;
+    }
+
+    syncMusicVolumeControls();
+  }
+
+  function updateMusicProgress() {
+    if (!musicAudio) return;
+
+    const duration = getMusicProgressDuration();
+    const progress = getMusicVisualProgress(musicAudio.currentTime, duration);
+
+    if (viewerMusicPlayhead) {
+      viewerMusicPlayhead.style.left = `${progress}%`;
+    }
+
+    if (viewerMusicCurrent) {
+      viewerMusicCurrent.textContent = formatMusicTime(musicAudio.currentTime);
+    }
+    if (viewerMusicDuration) {
+      viewerMusicDuration.textContent = formatMusicTime(duration);
+    }
+  }
+
+  function renderMusicSegments() {
+    if (!viewerMusicTrack) return;
+
+    viewerMusicTrack.querySelectorAll('.viewer-music-segment').forEach((segment) => segment.remove());
+
+    const duration = getMusicProgressDuration();
+    const segmentLayout = getMusicTimelineLayout(duration).filter((item) => !item.isGap);
+    segmentLayout.forEach((segment, index) => {
+      const progressSegment = document.createElement('div');
+      progressSegment.className = 'viewer-music-segment';
+      progressSegment.classList.toggle('is-first', index === 0);
+      progressSegment.classList.toggle('is-last', index === segmentLayout.length - 1);
+      progressSegment.classList.toggle('is-start', segment.start <= 0);
+      progressSegment.classList.toggle('is-end', segment.end >= duration);
+      progressSegment.dataset.label = segment.label;
+      progressSegment.setAttribute('aria-label', segment.label);
+      progressSegment.style.left = `${segment.left}${segment.unit}`;
+      progressSegment.style.width = `${segment.width}${segment.unit}`;
+      progressSegment.style.setProperty('--segment-color', segment.color);
+      viewerMusicTrack.insertBefore(progressSegment, viewerMusicPlayhead);
+    });
+  }
+
+  function pauseMusic() {
+    if (!musicAudio) return;
+    musicAudio.pause();
+    syncMusicPlayButtons(false);
+  }
+
+  function toggleMusicPlayback() {
+    if (!musicAudio) return;
+
+    if (musicAudio.paused) {
+      musicAudio.play().catch(() => {
+        syncMusicPlayButtons(false);
+      });
+    } else {
+      pauseMusic();
+    }
+  }
+
   imageCards.forEach((img) => {
     img.addEventListener('click', (e) => {
       e.stopPropagation();
@@ -374,54 +1109,273 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
       if (!card) return;
 
       if (!img.complete) return; // Basic safety check
-      isAnimating = true;
-      activeCard = card;
-      activeSourceRect = getCardRect(card);
-      idleSourceRect = getIdleCardRect(card, activeSourceRect.centerX, activeSourceRect.centerY);
-
+      setViewerMode('image');
       viewerImage.src = img.src;
       viewerImage.alt = img.alt || 'Expanded View';
 
-      const targetRect = getExpandedRect(activeSourceRect, img.naturalWidth, img.naturalHeight);
-
-      imageViewer.style.transition = 'none';
-      imageViewer.style.visibility = 'visible';
-      setViewerBounds(activeSourceRect);
-
-      void imageViewer.offsetWidth;
-
-      imageViewer.style.transition = [
-        `left ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-        `top ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-        `width ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-        `height ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
-        `transform ${TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
-      ].join(', ');
-      setViewerBounds(targetRect);
-      imageViewer.classList.add('is-active');
-      card.classList.add('is-active');
-      aboutExpanded.classList.add('viewer-active');
-
-      setTimeout(() => {
-        isAnimating = false;
-      }, TRANSITION_DURATION);
+      const sourceRect = getCardRect(card);
+      const targetRect = getExpandedRect(sourceRect, img.naturalWidth, img.naturalHeight);
+      animateViewerOpen(card, targetRect);
     });
   });
+
+  if (musicCard && viewerMusic && musicAudio) {
+    const openMusicViewer = (e) => {
+      e.stopPropagation();
+      if (isAnimating) return;
+
+      // Temporarily set active state to capture correct unrotated start rect
+      const prevTransition = musicCard.style.transition;
+      musicCard.style.transition = 'none';
+      musicCard.classList.add('is-active');
+      aboutExpanded.classList.add('viewer-active');
+      void musicCard.offsetWidth;
+
+      const rawStartRect = musicPreviewVolume?.getBoundingClientRect();
+      const currentCardRect = getCardRect(musicCard);
+      const volumeStartRect = rawStartRect ? {
+        left: Math.round(rawStartRect.left),
+        top: Math.round(rawStartRect.top),
+        width: Math.round(rawStartRect.width),
+        height: Math.round(rawStartRect.height),
+        rot: currentCardRect.rot
+      } : null;
+
+      musicCard.classList.remove('is-active');
+      aboutExpanded.classList.remove('viewer-active');
+      void musicCard.offsetWidth;
+      musicCard.style.transition = prevTransition;
+
+      const targetRect = getMusicExpandedRect();
+      setViewerMode('music');
+      viewerImage.src = '';
+      animateVolumeControlOpen(volumeStartRect, targetRect);
+      animateViewerOpen(musicCard, targetRect);
+      requestAnimationFrame(() => {
+        renderMusicSegments();
+        renderMusicSongDots();
+        syncMusicNavigationState();
+        updateMusicProgress();
+        syncMusicPlayButtons(!musicAudio.paused);
+      });
+    };
+
+    musicCard.addEventListener('click', openMusicViewer);
+    musicCard.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        openMusicViewer(e);
+      }
+    });
+  }
+
+  if (musicPreviewPlay && musicAudio) {
+    musicPreviewPlay.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMusicPlayback();
+    });
+  }
+
+  if (musicAudio && viewerMusicPlay) {
+    viewerMusicPlay.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleMusicPlayback();
+    });
+
+    viewerMusicPrevious?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      changeMusicSong(-1);
+    });
+
+    viewerMusicNext?.addEventListener('click', (e) => {
+      e.stopPropagation();
+      changeMusicSong(1);
+    });
+
+    musicAudio.addEventListener('loadedmetadata', () => {
+      renderMusicSegments();
+      renderMusicSongDots();
+      updateMusicProgress();
+      syncMusicVolumeControls();
+      syncMusicNavigationState();
+    });
+
+    musicAudio.addEventListener('timeupdate', updateMusicProgress);
+
+    musicAudio.addEventListener('play', () => {
+      syncMusicPlayButtons(true);
+    });
+
+    musicAudio.addEventListener('pause', () => {
+      syncMusicPlayButtons(false);
+    });
+
+    musicAudio.addEventListener('ended', () => {
+      if (musicSongs.length > 1) {
+        changeMusicSong(1);
+      } else {
+        pauseMusic();
+        musicAudio.currentTime = 0;
+        updateMusicProgress();
+      }
+    });
+
+    musicAudio.addEventListener('volumechange', syncMusicVolumeControls);
+  }
+
+  if (musicAudio && musicVolumeButtons.length > 0) {
+    musicVolumeButtons.forEach((button) => {
+      button.addEventListener('click', (e) => {
+        e.stopPropagation();
+        toggleMusicMute();
+      });
+    });
+  }
+
+  if (musicAudio && musicVolumeSliders.length > 0) {
+    musicVolumeSliders.forEach((slider) => {
+      slider.addEventListener('input', (e) => {
+        e.stopPropagation();
+        musicAudio.volume = Number(slider.value);
+        musicAudio.muted = musicAudio.volume === 0;
+        syncMusicVolumeControls();
+      });
+
+      slider.addEventListener('click', (e) => {
+        e.stopPropagation();
+      });
+    });
+  }
+
+  syncMusicVolumeControls();
+  syncMusicSongLabels();
+  syncMusicNavigationState();
+  renderMusicSongDots();
+
+  if (viewerMusicTrack && musicAudio) {
+    let isMusicScrubbing = false;
+
+    const seekMusicFromPointer = (e) => {
+      const rect = viewerMusicTrack.getBoundingClientRect();
+      const duration = getMusicProgressDuration();
+      musicAudio.currentTime = getMusicTimeFromVisualPosition(e.clientX - rect.left, duration);
+      updateMusicProgress();
+    };
+
+    viewerMusicTrack.addEventListener('click', (e) => {
+      e.stopPropagation();
+      seekMusicFromPointer(e);
+    });
+
+    viewerMusicTrack.addEventListener('pointerdown', (e) => {
+      e.stopPropagation();
+      isMusicScrubbing = true;
+      viewerMusicTrack.setPointerCapture(e.pointerId);
+      seekMusicFromPointer(e);
+      e.preventDefault();
+    });
+
+    viewerMusicTrack.addEventListener('pointermove', (e) => {
+      if (!isMusicScrubbing) return;
+
+      seekMusicFromPointer(e);
+      e.preventDefault();
+    });
+
+    const stopMusicScrubbing = (e) => {
+      if (!isMusicScrubbing) return;
+
+      isMusicScrubbing = false;
+      if (viewerMusicTrack.hasPointerCapture(e.pointerId)) {
+        viewerMusicTrack.releasePointerCapture(e.pointerId);
+      }
+    };
+
+    viewerMusicTrack.addEventListener('pointerup', stopMusicScrubbing);
+    viewerMusicTrack.addEventListener('pointercancel', stopMusicScrubbing);
+    viewerMusicTrack.addEventListener('lostpointercapture', () => {
+      isMusicScrubbing = false;
+    });
+  }
 
   viewerBackBtn.addEventListener('click', (e) => {
     e.stopPropagation();
     if (isAnimating) return;
     isAnimating = true;
+    const wasMusicMode = activeMode === 'music';
 
-    if (activeCard && idleSourceRect) {
-      setViewerBounds(idleSourceRect);
+    let volumeStartRect = null;
+    let volumeEndRect = null;
+
+    if (wasMusicMode && musicCard && musicPreviewVolume && viewerMusicVolume) {
+      volumeStartRect = viewerMusicVolume.getBoundingClientRect();
+      const targetRect = getMusicExpandedRect();
+      const expandedVolumeRect = getExpandedVolumeRect(targetRect);
+      if (expandedVolumeRect) {
+        volumeStartRect = expandedVolumeRect; // use logical calculated rect instead of DOM rect for accuracy
+      }
+
+      const rootFontSize = parseFloat(window.getComputedStyle(document.documentElement).fontSize) || 16;
+
+      // Temporarily set idle state to capture correct end rect
+      const prevTransition = musicCard.style.transition;
+      musicCard.style.transition = 'none';
+      musicCard.classList.remove('is-active');
+      aboutExpanded.classList.remove('viewer-active');
+
+      const rawEndRect = musicPreviewVolume.getBoundingClientRect();
+      const cx = rawEndRect.left + rawEndRect.width / 2;
+      const cy = rawEndRect.top + rawEndRect.height / 2;
+      volumeEndRect = {
+        left: Math.round(cx - rootFontSize),
+        top: Math.round(cy - rootFontSize),
+        width: 2 * rootFontSize,
+        height: 2 * rootFontSize,
+        buttonSize: 2 * rootFontSize,
+        sliderWidth: 0,
+        rot: idleSourceRect.rot || '0deg'
+      };
+
+      musicCard.classList.add('is-active');
+      aboutExpanded.classList.add('viewer-active');
+      void musicCard.offsetWidth;
+      musicCard.style.transition = prevTransition;
     }
 
+    if (wasMusicMode) {
+      imageViewer.classList.add('is-music-closing');
+    }
+    aboutExpanded.classList.add('viewer-returning');
+
     imageViewer.classList.remove('is-active');
+    imageViewer.classList.remove('img-visible');
     aboutExpanded.classList.remove('viewer-active');
 
     if (activeCard) {
       activeCard.classList.remove('is-active');
+    }
+
+    if (activeCard) {
+      let closeTargetRect = idleSourceRect;
+      if (closeTargetRect) {
+        closeTargetRect = {
+          left: closeTargetRect.left,
+          top: closeTargetRect.top,
+          width: closeTargetRect.width,
+          height: closeTargetRect.height,
+          rot: closeTargetRect.rot
+        };
+        if (wasMusicMode) {
+          closeTargetRect.left += MUSIC_CLOSE_TARGET_OFFSET_X;
+          closeTargetRect.top += MUSIC_CLOSE_TARGET_OFFSET_Y;
+        }
+        imageViewer.style.boxShadow = '0 0 0 rgba(0, 0, 0, 0)';
+        setViewerBounds(closeTargetRect);
+      }
+    }
+
+    if (wasMusicMode && musicCard) {
+      animateVolumeControlBetween(volumeStartRect, volumeEndRect, { fromCompact: false, toCompact: true });
     }
 
     setTimeout(() => {
@@ -432,20 +1386,26 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
       imageViewer.style.height = '0px';
       imageViewer.style.visibility = 'hidden';
       imageViewer.style.transform = '';
+      imageViewer.style.opacity = '';
       viewerImage.src = '';
+      imageViewer.classList.remove('is-music-closing');
+      aboutExpanded.classList.remove('viewer-returning');
+      // activeCard.classList.remove('is-active') is already handled at the start
+      setViewerMode(null);
       void imageViewer.offsetWidth;
       imageViewer.style.transition = '';
       activeCard = null;
+      activeMode = null;
       activeSourceRect = null;
       idleSourceRect = null;
       isAnimating = false;
-    }, TRANSITION_DURATION + 50);
+    }, TRANSITION_DURATION + 80);
   });
 
-  // Close when clicking outside the expanded image
+  // Close when clicking outside the expanded viewer
   document.addEventListener('click', (e) => {
     if (imageViewer.classList.contains('is-active') && !isAnimating) {
-      if (e.target !== viewerImage && e.target !== viewerBackBtn && !viewerBackBtn.contains(e.target)) {
+      if (!imageViewer.contains(e.target)) {
         viewerBackBtn.click();
       }
     }
@@ -490,4 +1450,111 @@ if (searchBarInput) {
       }
     }
   });
+}
+
+/* ---------- Custom Scrollbar Functionality ---------- */
+const scrollContainer = document.querySelector('.custom-scrollbar-container');
+const scrollThumb = document.querySelector('.custom-scrollbar-thumb');
+
+if (scrollContainer && scrollThumb) {
+  const clamp = (value, min, max) => Math.min(max, Math.max(min, value));
+
+  const positionScrollContainer = () => {
+    const heroSection = document.querySelector('.hero');
+    const rightImage = document.getElementById('fixed-img-right');
+    const defaultHeight = 250;
+    const gap = 24;
+
+    const heroBottom = heroSection ? heroSection.getBoundingClientRect().bottom : 0;
+    const rightImageRect = rightImage ? rightImage.getBoundingClientRect() : null;
+    const rightImageVisible = rightImageRect && rightImageRect.width > 0 && rightImageRect.height > 0 && rightImageRect.top < window.innerHeight;
+    const lowerLimit = rightImageVisible ? rightImageRect.top : window.innerHeight;
+    const safeTop = Math.max(gap, heroBottom + gap);
+    const safeBottom = Math.min(window.innerHeight - gap, lowerLimit - gap);
+    const availableHeight = safeBottom - safeTop;
+
+    if (availableHeight < 30) {
+      scrollContainer.style.display = 'none';
+      return 0;
+    }
+
+    const containerHeight = Math.min(defaultHeight, availableHeight);
+    const containerCenter = safeTop + (availableHeight / 2);
+
+    scrollContainer.style.top = `${containerCenter}px`;
+    scrollContainer.style.height = `${containerHeight}px`;
+
+    return containerHeight;
+  };
+
+  // Dragging logic
+  let isDragging = false;
+  let grabOffsetY = 0;
+  let dragTrackTop = 0;
+  let dragTrackHeight = 0;
+
+  const updateThumb = () => {
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (scrollHeight <= 0) {
+      scrollContainer.style.display = 'none';
+      return;
+    }
+    if (isDragging) return;
+
+    const containerHeight = positionScrollContainer();
+    if (containerHeight <= 0) return;
+
+    scrollContainer.style.display = 'block';
+    // Thumb height proportional to viewport
+    let thumbHeight = Math.max(30, (window.innerHeight / document.documentElement.scrollHeight) * containerHeight);
+    scrollThumb.style.height = `${thumbHeight}px`;
+
+    const scrollRatio = window.scrollY / scrollHeight;
+    const maxTop = containerHeight - thumbHeight;
+    scrollThumb.style.top = `${scrollRatio * maxTop}px`;
+  };
+
+  window.addEventListener('scroll', updateThumb, { passive: true });
+  window.addEventListener('resize', updateThumb);
+  // Initial calculation
+  setTimeout(updateThumb, 100);
+
+  scrollThumb.addEventListener('pointerdown', (e) => {
+    isDragging = true;
+    const containerRect = scrollContainer.getBoundingClientRect();
+    grabOffsetY = e.clientY - scrollThumb.getBoundingClientRect().top;
+    dragTrackTop = containerRect.top;
+    dragTrackHeight = containerRect.height;
+    scrollThumb.setPointerCapture(e.pointerId);
+    document.body.style.userSelect = 'none';
+    e.preventDefault();
+  });
+
+  scrollThumb.addEventListener('pointermove', (e) => {
+    if (!isDragging) return;
+    const containerHeight = dragTrackHeight;
+    const thumbHeight = scrollThumb.clientHeight;
+    const maxTop = containerHeight - thumbHeight;
+    const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
+    if (maxTop <= 0 || scrollHeight <= 0) return;
+
+    const thumbTop = clamp(e.clientY - dragTrackTop - grabOffsetY, 0, maxTop);
+    scrollThumb.style.top = `${thumbTop}px`;
+    window.scrollTo(0, (thumbTop / maxTop) * scrollHeight);
+    e.preventDefault();
+  });
+
+  const stopDragging = (e) => {
+    if (isDragging) {
+      isDragging = false;
+      if (e?.pointerId !== undefined && scrollThumb.hasPointerCapture(e.pointerId)) {
+        scrollThumb.releasePointerCapture(e.pointerId);
+      }
+      document.body.style.userSelect = '';
+      updateThumb();
+    }
+  };
+
+  scrollThumb.addEventListener('pointerup', stopDragging);
+  scrollThumb.addEventListener('pointercancel', stopDragging);
 }

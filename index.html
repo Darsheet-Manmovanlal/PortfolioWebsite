@@ -32,7 +32,7 @@
     <main class="container">
       <section class="section-panel about-section" id="about-section">
         <h2 id="about">About Me</h2>
-        <p>A strong passion with cutting edge computers/systems, keeping up-to-date on the latest trends, alongside a heavy interest in photography. I also love creating song covers with my friends, involved in the bandlab space.</p>
+        <p>A strong passion with cutting edge computers/systems, keeping up-to-date on the latest trends, alongside a heavy interest in photography. Also, I love creating song covers, whether it's with my friends or independently. Music allows me to express my creativity and connect with others through its very own universal language.</p>
 
         <div class="about-expanded" style="position: relative;">
           <div class="about-card" style="--rot:-3deg; --delay:0ms">
@@ -47,24 +47,32 @@
           <div class="about-card" style="--rot:4deg; --delay:180ms">
             <img class="about-card-image" src="images/image4.jpg" alt="Photography sample 4" loading="lazy">
           </div>
-          <div class="about-card about-card-music" style="--rot:-4deg; --delay:240ms">
+          <div class="about-card about-card-music" id="about-music-card" style="--rot:-4deg; --delay:240ms" role="button" tabindex="0" aria-label="Open BandLab cover player">
             <div class="music-player" id="about-music-player">
-              <div class="music-player-info">
-                <span class="music-note-icon">♫</span>
-                <span class="music-title">Song Cover</span>
-                <span class="music-artist">With Friends · BandLab</span>
+              <div class="viewer-music-volume viewer-music-volume-preview">
+                <button class="viewer-music-volume-btn" id="about-music-volume-btn" type="button" aria-label="Mute cover">
+                  <svg class="volume-icon volume-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="4,9 8,9 13,4 13,20 8,15 4,15"></polygon>
+                    <path class="vol-wave-1" d="M16 8.5C17.1 9.5 17.75 10.7 17.75 12C17.75 13.3 17.1 14.5 16 15.5"></path>
+                    <path class="vol-wave-2" d="M18.6 6C20.2 7.7 21 9.7 21 12C21 14.3 20.2 16.3 18.6 18"></path>
+                    <path class="vol-wave-3" d="M21.2 3.5C23.3 5.5 24.25 8.2 24.25 12C24.25 15.8 23.3 18.5 21.2 20.5"></path>
+                  </svg>
+                  <svg class="volume-icon volume-muted-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="4,9 8,9 13,4 13,20 8,15 4,15"></polygon>
+                    <path d="M18 9L22 13"></path>
+                    <path d="M22 9L18 13"></path>
+                  </svg>
+                </button>
+                <input class="viewer-music-volume-slider" id="about-music-volume-slider" type="range" min="0" max="1" step="0.01" value="1" aria-label="Cover volume">
               </div>
-              <button class="music-play-btn" id="about-music-play" aria-label="Play">
-                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="6,3 20,12 6,21"/></svg>
-                <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="5" y="3" width="4" height="18"/><rect x="15" y="3" width="4" height="18"/></svg>
+              <div class="viewer-music-header">
+                <span class="viewer-music-kicker">BANDLAB COVER</span>
+                <h3 class="viewer-music-title">Don't say that<br>you love me -<br>Jin (cover)</h3>
+              </div>
+              <button class="viewer-music-play" id="about-music-play" type="button" aria-label="Play cover">
+                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="7,4 20,12 7,20"/></svg>
+                <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
               </button>
-              <div class="music-bottom">
-                <span class="music-time">0:00</span>
-                <div class="music-progress-track">
-                  <div class="music-progress-fill" id="about-music-progress"></div>
-                </div>
-                <span class="music-time">3:24</span>
-              </div>
             </div>
           </div>
           <div class="about-card" style="--rot:3deg; --delay:300ms">
@@ -76,6 +84,61 @@
               <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="16,4 6,12 16,20"/></svg>
             </button>
             <img src="" alt="Expanded View" class="viewer-image" id="viewer-image">
+            <div class="viewer-music" id="viewer-music" aria-hidden="true">
+              <audio
+                id="about-music-audio"
+                src="audio/jin.mp4"
+                preload="metadata"
+                data-title="Don't say that|you love me -|Jin (cover)"
+                data-kicker="BANDLAB COVER"
+                data-duration-seconds="180"
+                data-min-visible-gap-pixels="8"
+                data-edge-inset-seconds="4"
+                data-segments='[
+                  {"start":16,"end":70,"label":"Reign","color":"#60a5fa"},
+                  {"start":72,"end":89,"label":"Darsheet","color":"#f59e0b"},
+                  {"start":89,"end":108,"label":"Both","color":"#34d399"},
+                  {"start":108,"end":120,"label":"Darsheet + Reign adlibs","color":"#f472b6"},
+                  {"start":120,"end":141,"label":"Reign + Darsheet adlibs","color":"#a78bfa"},
+                  {"start":141,"end":180,"label":"Both","color":"#34d399"}
+                ]'></audio>
+              <div class="viewer-music-volume viewer-music-volume-expanded">
+                <button class="viewer-music-volume-btn" id="viewer-music-volume-btn" type="button" aria-label="Mute cover">
+                  <svg class="volume-icon volume-on-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="4,9 8,9 13,4 13,20 8,15 4,15"></polygon>
+                    <path class="vol-wave-1" d="M16 8.5C17.1 9.5 17.75 10.7 17.75 12C17.75 13.3 17.1 14.5 16 15.5"></path>
+                    <path class="vol-wave-2" d="M18.6 6C20.2 7.7 21 9.7 21 12C21 14.3 20.2 16.3 18.6 18"></path>
+                    <path class="vol-wave-3" d="M21.2 3.5C23.3 5.5 24.25 8.2 24.25 12C24.25 15.8 23.3 18.5 21.2 20.5"></path>
+                  </svg>
+                  <svg class="volume-icon volume-muted-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
+                    <polygon points="4,9 8,9 13,4 13,20 8,15 4,15"></polygon>
+                    <path d="M18 9L22 13"></path>
+                    <path d="M22 9L18 13"></path>
+                  </svg>
+                </button>
+                <input class="viewer-music-volume-slider" id="viewer-music-volume-slider" type="range" min="0" max="1" step="0.01" value="1" aria-label="Cover volume">
+              </div>
+              <div class="viewer-music-header">
+                <span class="viewer-music-kicker">BANDLAB COVER</span>
+                <h3 class="viewer-music-title">Don't say that<br>you love me -<br>Jin (cover)</h3>
+              </div>
+              <button class="viewer-music-play" id="viewer-music-play" type="button" aria-label="Play cover">
+                <svg class="play-icon" viewBox="0 0 24 24" fill="currentColor"><polygon points="7,4 20,12 7,20"/></svg>
+                <svg class="pause-icon" viewBox="0 0 24 24" fill="currentColor"><rect x="6" y="4" width="4" height="16"/><rect x="14" y="4" width="4" height="16"/></svg>
+              </button>
+              <div class="viewer-music-times">
+                <span id="viewer-music-current">0:00</span>
+                <span id="viewer-music-duration">3:00</span>
+              </div>
+              <div class="viewer-music-progress" id="viewer-music-track" aria-label="Song progress">
+                <div class="viewer-music-playhead" id="viewer-music-playhead"></div>
+              </div>
+              <div class="viewer-music-nav" aria-label="Song navigation">
+                <button class="viewer-music-nav-btn" id="viewer-music-prev" type="button">Previous</button>
+                <button class="viewer-music-nav-btn" id="viewer-music-next" type="button">Next</button>
+              </div>
+              <div class="viewer-music-song-pill" id="viewer-music-song-pill" aria-label="Song selection"></div>
+            </div>
           </div>
         </div>
         
@@ -87,6 +150,17 @@
           <div class="decor-right">
             <div class="decor-text decor-text-right" id="decor-text-right">This is me<br>(with a mask on).</div>
           </div>
+        </div>
+
+        <div id="fixed-decorations" class="fixed-decorations">
+          <svg class="dynamic-arrows-canvas" id="dynamic-arrows-canvas" xmlns="http://www.w3.org/2000/svg">
+            <path id="dynamic-arrow-left" class="arrow-line" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="1"/>
+            <path id="dynamic-arrow-head-left" class="arrow-head" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
+            <path id="dynamic-arrow-right" class="arrow-line" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="1"/>
+            <path id="dynamic-arrow-head-right" class="arrow-head" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
+          </svg>
+          <img src="images/josh.png" alt="Joshua" class="fixed-img fixed-img-left" id="fixed-img-left">
+          <img src="images/dar.png" alt="Dar" class="fixed-img fixed-img-right" id="fixed-img-right">
         </div>
 
       </section>
@@ -207,15 +281,10 @@
     <p>Made by Darsheet, 2026</p>
 </footer>
 
-<div id="fixed-decorations" class="fixed-decorations">
-  <svg class="dynamic-arrows-canvas" id="dynamic-arrows-canvas" xmlns="http://www.w3.org/2000/svg">
-    <path id="dynamic-arrow-left" class="arrow-line" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="1"/>
-    <path id="dynamic-arrow-head-left" class="arrow-head" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
-    <path id="dynamic-arrow-right" class="arrow-line" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="1"/>
-    <path id="dynamic-arrow-head-right" class="arrow-head" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
-  </svg>
-  <img src="images/josh.png" alt="Joshua" class="fixed-img fixed-img-left" id="fixed-img-left">
-  <img src="images/dar.png" alt="Dar" class="fixed-img fixed-img-right" id="fixed-img-right">
+
+
+<div class="custom-scrollbar-container">
+  <div class="custom-scrollbar-thumb"></div>
 </div>
 
 </body>
