@@ -60,6 +60,10 @@ if (topBar) {
       }
       element = element.parentElement;
     }
+    const rootBg = getComputedStyle(document.documentElement).backgroundColor;
+    if (rootBg && rootBg !== 'transparent' && rootBg !== 'rgba(0, 0, 0, 0)' && rootBg !== 'inherit') {
+      return rootBg;
+    }
     return 'rgb(255, 255, 255)';
   };
 
@@ -79,15 +83,7 @@ if (topBar) {
     const opacity = minOpacity + (maxOpacity - minOpacity) * progress;
     const blur = minBlur + (maxBlur - minBlur) * progress;
 
-    const rect = topBar.getBoundingClientRect();
-    const probeX = window.innerWidth / 2;
-    const probeY = rect.bottom + 2;
-
-    topBar.style.visibility = 'hidden';
-    const elementBelow = document.elementFromPoint(probeX, probeY);
-    topBar.style.visibility = 'visible';
-
-    const bgColor = findBackgroundColor(elementBelow || document.documentElement);
+    const bgColor = findBackgroundColor(document.body);
     const bgRgb = parseColor(bgColor);
     const bgBrightness = brightness(bgRgb);
     const mixRatio = 1 - bgBrightness; // light background => blue text; dark background => light text
@@ -143,12 +139,12 @@ if (aboutSection && heroSection && topBar) {
       if (!aboutSection.classList.contains('is-expanded')) {
         aboutSection.classList.add('is-expanded');
 
-        // Re-evaluate scroll logic during the CSS transition (800ms)
+        // Re-evaluate scroll logic during the CSS transition (1200ms)
         // so that elements pushed down by the expansion update correctly
         const startTime = performance.now();
         const tick = (now) => {
           handleScrollAnimations();
-          if (now - startTime < 1000) {
+          if (now - startTime < 1300) {
             requestAnimationFrame(tick);
           }
         };
@@ -727,20 +723,69 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
   function renderMusicSongDots() {
     if (!viewerMusicSongPill) return;
 
-    viewerMusicSongPill.innerHTML = '';
-    musicSongs.forEach((song, index) => {
-      const dot = document.createElement('button');
-      dot.className = 'viewer-music-song-dot';
-      dot.type = 'button';
-      dot.classList.toggle('is-active', index === activeSongIndex);
-      dot.setAttribute('aria-label', `Play ${song.title.replace(/\|/g, ' ')}`);
-      dot.setAttribute('aria-current', index === activeSongIndex ? 'true' : 'false');
-      dot.addEventListener('click', (e) => {
-        e.stopPropagation();
-        selectMusicSong(index);
+    let indicator = viewerMusicSongPill.querySelector('.viewer-music-song-active-indicator');
+    
+    if (!indicator || viewerMusicSongPill.querySelectorAll('.viewer-music-song-dot').length !== musicSongs.length) {
+      viewerMusicSongPill.innerHTML = '';
+      
+      indicator = document.createElement('div');
+      indicator.className = 'viewer-music-song-active-indicator';
+      viewerMusicSongPill.appendChild(indicator);
+
+      musicSongs.forEach((song, index) => {
+        const dot = document.createElement('button');
+        dot.className = 'viewer-music-song-dot';
+        dot.type = 'button';
+        dot.setAttribute('aria-label', `Play ${song.title.replace(/\|/g, ' ')}`);
+        dot.addEventListener('click', (e) => {
+          e.stopPropagation();
+          selectMusicSong(index);
+        });
+        viewerMusicSongPill.appendChild(dot);
       });
-      viewerMusicSongPill.appendChild(dot);
+    }
+
+    let lastActiveIndex = parseInt(viewerMusicSongPill.dataset.lastActive || 0);
+
+    const dots = viewerMusicSongPill.querySelectorAll('.viewer-music-song-dot');
+    dots.forEach((dot, index) => {
+      const isActive = index === activeSongIndex;
+      dot.classList.toggle('is-active', isActive);
+      dot.setAttribute('aria-current', isActive ? 'true' : 'false');
+      
+      if (isActive && indicator) {
+        if (lastActiveIndex !== activeSongIndex) {
+          const startDot = dots[lastActiveIndex] || dots[0];
+          const endDot = dot;
+          
+          const startLeft = startDot.offsetLeft;
+          const endLeft = endDot.offsetLeft;
+          
+          const minLeft = Math.min(startLeft, endLeft);
+          const maxRight = Math.max(startLeft + startDot.offsetWidth, endLeft + endDot.offsetWidth);
+          const stretchWidth = maxRight - minLeft;
+          
+          indicator.style.setProperty('--start-left', `${startLeft}px`);
+          indicator.style.setProperty('--start-width', `${startDot.offsetWidth}px`);
+          
+          indicator.style.setProperty('--min-left', `${minLeft}px`);
+          indicator.style.setProperty('--stretch-width', `${stretchWidth}px`);
+          
+          indicator.style.setProperty('--end-left', `${endLeft}px`);
+          indicator.style.setProperty('--end-width', `${endDot.offsetWidth}px`);
+          
+          indicator.classList.remove('is-stretching');
+          void indicator.offsetWidth; // Force reflow
+          indicator.classList.add('is-stretching');
+        } else {
+          indicator.style.setProperty('--end-left', `${dot.offsetLeft}px`);
+          indicator.style.setProperty('--end-width', `${dot.offsetWidth}px`);
+          indicator.classList.remove('is-stretching');
+        }
+      }
     });
+    
+    viewerMusicSongPill.dataset.lastActive = activeSongIndex;
   }
 
   function applyMusicSong(song, shouldResume) {
@@ -1082,6 +1127,46 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
     });
   }
 
+  let audioCtx;
+  let audioSource;
+  let compressor;
+  let masterGain;
+
+  function initAudioContext() {
+    if (audioCtx) return;
+    const AudioContext = window.AudioContext || window.webkitAudioContext;
+    if (!AudioContext) return;
+    
+    audioCtx = new AudioContext();
+    audioSource = audioCtx.createMediaElementSource(musicAudio);
+    
+    // Create a compressor for universal normalization
+    // Aggressive settings to act like a limiter
+    compressor = audioCtx.createDynamicsCompressor();
+    compressor.threshold.value = -40; // Catch almost all signals
+    compressor.knee.value = 40;       // Very smooth transition
+    compressor.ratio.value = 20;      // Hard limit
+    compressor.attack.value = 0.005;  // Fast attack
+    compressor.release.value = 0.25;  // Moderate release
+    
+    // Create a master gain node to reduce the max volume significantly
+    masterGain = audioCtx.createGain();
+    
+    audioSource.connect(compressor);
+    compressor.connect(masterGain);
+    masterGain.connect(audioCtx.destination);
+    
+    updateWebAudioVolume();
+  }
+
+  function updateWebAudioVolume() {
+    if (masterGain && musicAudio && audioCtx) {
+      const targetVolume = musicAudio.muted ? 0 : musicAudio.volume;
+      // Significantly reduce max volume (max 40% of original)
+      masterGain.gain.setTargetAtTime(targetVolume * 0.4, audioCtx.currentTime, 0.05);
+    }
+  }
+
   function pauseMusic() {
     if (!musicAudio) return;
     musicAudio.pause();
@@ -1090,6 +1175,11 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
 
   function toggleMusicPlayback() {
     if (!musicAudio) return;
+
+    initAudioContext();
+    if (audioCtx && audioCtx.state === 'suspended') {
+      audioCtx.resume();
+    }
 
     if (musicAudio.paused) {
       musicAudio.play().catch(() => {
@@ -1123,6 +1213,11 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
     const openMusicViewer = (e) => {
       e.stopPropagation();
       if (isAnimating) return;
+
+      initAudioContext();
+      if (audioCtx && audioCtx.state === 'suspended') {
+        audioCtx.resume();
+      }
 
       // Temporarily set active state to capture correct unrotated start rect
       const prevTransition = musicCard.style.transition;
@@ -1194,7 +1289,6 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
 
     musicAudio.addEventListener('loadedmetadata', () => {
       renderMusicSegments();
-      renderMusicSongDots();
       updateMusicProgress();
       syncMusicVolumeControls();
       syncMusicNavigationState();
@@ -1220,7 +1314,10 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
       }
     });
 
-    musicAudio.addEventListener('volumechange', syncMusicVolumeControls);
+    musicAudio.addEventListener('volumechange', () => {
+      syncMusicVolumeControls();
+      updateWebAudioVolume();
+    });
   }
 
   if (musicAudio && musicVolumeButtons.length > 0) {
@@ -1254,6 +1351,7 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
 
   if (viewerMusicTrack && musicAudio) {
     let isMusicScrubbing = false;
+    let wasPlayingBeforeScrub = false;
 
     const seekMusicFromPointer = (e) => {
       const rect = viewerMusicTrack.getBoundingClientRect();
@@ -1262,14 +1360,15 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
       updateMusicProgress();
     };
 
-    viewerMusicTrack.addEventListener('click', (e) => {
-      e.stopPropagation();
-      seekMusicFromPointer(e);
-    });
-
     viewerMusicTrack.addEventListener('pointerdown', (e) => {
       e.stopPropagation();
       isMusicScrubbing = true;
+      wasPlayingBeforeScrub = !musicAudio.paused;
+      
+      if (wasPlayingBeforeScrub) {
+        musicAudio.pause();
+      }
+
       viewerMusicTrack.setPointerCapture(e.pointerId);
       seekMusicFromPointer(e);
       e.preventDefault();
@@ -1289,11 +1388,22 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
       if (viewerMusicTrack.hasPointerCapture(e.pointerId)) {
         viewerMusicTrack.releasePointerCapture(e.pointerId);
       }
+      
+      if (wasPlayingBeforeScrub) {
+        musicAudio.play().catch(() => {
+          syncMusicPlayButtons(false);
+        });
+      }
     };
 
     viewerMusicTrack.addEventListener('pointerup', stopMusicScrubbing);
     viewerMusicTrack.addEventListener('pointercancel', stopMusicScrubbing);
     viewerMusicTrack.addEventListener('lostpointercapture', () => {
+      if (isMusicScrubbing && wasPlayingBeforeScrub) {
+        musicAudio.play().catch(() => {
+          syncMusicPlayButtons(false);
+        });
+      }
       isMusicScrubbing = false;
     });
   }
