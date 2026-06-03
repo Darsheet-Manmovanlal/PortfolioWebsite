@@ -1,4 +1,15 @@
 @import url('https://fonts.googleapis.com/css2?family=Caveat:wght@600&display=swap');
+
+@property --hero-bg-start {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #ffffff;
+}
+@property --hero-bg-end {
+  syntax: '<color>';
+  inherits: false;
+  initial-value: #f6fbff;
+}
 /*
   styles.css
   - External stylesheet for the portfolio page
@@ -9,6 +20,13 @@
 /* ---------- Base / Reset ---------- */
 * {
   box-sizing: border-box;
+}
+html.no-transition,
+html.no-transition *:not(.custom-scrollbar-container),
+html.no-transition *::before,
+html.no-transition *::after {
+  transition: none !important;
+  animation: none !important;
 }
 /*
   Units explained:
@@ -58,7 +76,7 @@
   --top-bar-opacity-end: 0.52;
   --top-bar-blur-start: 2;
   --top-bar-blur-end: 5;
-  --top-bar-text: 11, 99, 214;
+  --top-bar-text: 18, 103, 215;
 }
 
 /* Dark Mode */
@@ -74,7 +92,7 @@ html.dark-mode {
   --text-primary: #e8ecf1;
   --top-bar-opacity-start: 0.3;
   --top-bar-opacity-end: 0.65;
-  --top-bar-text: 255, 255, 255;
+  --top-bar-text: 237, 243, 252;
 }
 html, body {
   margin: 0;
@@ -125,6 +143,7 @@ body {
   gap: 1rem;
 }
 html.dark-mode .top-bar {
+  background: rgba(0, 0, 0, var(--top-bar-opacity-start));
   border-bottom-color: rgba(58, 63, 77, 0.5);
   box-shadow: 0 12px 40px rgba(0, 0, 0, 0.3);
 }
@@ -240,32 +259,16 @@ html.dark-mode .toggle-thumb {
   padding: var(--space-lg) var(--gutter);
   border-bottom: 1px solid var(--muted-border-2);
   text-align: center;
-  transition: border-color 300ms ease;
+  --hero-bg-start: #ffffff;
+  --hero-bg-end: #f6fbff;
+  background: linear-gradient(90deg, var(--hero-bg-start), var(--hero-bg-end));
+  transition: --hero-bg-start 300ms ease, --hero-bg-end 300ms ease, border-color 300ms ease;
   z-index: 9999;
 }
 
-/* Light mode background */
-.hero::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, #ffffff, #f6fbff);
-  z-index: -1;
-}
-
-/* Dark mode background */
-.hero::after {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(90deg, #1a1f2e, #151d2d);
-  z-index: -1;
-  opacity: 0;
-  transition: opacity 300ms ease;
-}
-
-html.dark-mode .hero::after {
-  opacity: 1;
+html.dark-mode .hero {
+  --hero-bg-start: #1a1f2e;
+  --hero-bg-end: #151d2d;
 }
 .hero h1 {
   margin: 0 0 0.25rem 0;
@@ -1954,6 +1957,8 @@ body {
   pointer-events: none; /* Let container be transparent to clicks, but thumb will catch them */
   box-shadow: inset 0 0 8px rgba(11, 99, 214, 0.08);
   box-sizing: border-box;
+  opacity: 0; /* Hidden until JS positions it */
+  transition: opacity 500ms ease;
 }
 
 html.dark-mode .custom-scrollbar-container {
