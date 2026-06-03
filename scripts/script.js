@@ -14,6 +14,15 @@ document.addEventListener('DOMContentLoaded', function () {
       }
     });
   });
+
+  const darkModeToggle = document.getElementById('dark-mode-toggle');
+  if (darkModeToggle) {
+    darkModeToggle.addEventListener('click', () => {
+      document.documentElement.classList.toggle('dark-mode');
+      const isNowDark = document.documentElement.classList.contains('dark-mode');
+      localStorage.setItem('dark-mode', isNowDark);
+    });
+  }
 });
 /*
   script.js
@@ -101,6 +110,13 @@ if (topBar) {
 
   window.addEventListener('resize', updateGlassEffect, { passive: true });
   updateGlassEffect();
+
+  // Re-enable transitions after the first paint has applied all JS-computed styles
+  requestAnimationFrame(() => {
+    requestAnimationFrame(() => {
+      document.documentElement.classList.remove('no-transition');
+    });
+  });
 }
 
 /* ---------- About Section Scroll Animations ---------- */
@@ -117,10 +133,13 @@ if (aboutSection && heroSection && topBar) {
 
   let arrowsInitialized = false;
 
+  let cachedTopBarHeight = topBar.offsetHeight;
+  window.addEventListener('resize', () => { cachedTopBarHeight = topBar.offsetHeight; }, { passive: true });
+
   const handleScrollAnimations = () => {
     if (!aboutSection || !heroSection || !topBar) return;
 
-    const topBarBottom = window.scrollY + topBar.offsetHeight;
+    const topBarBottom = window.scrollY + cachedTopBarHeight;
     const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
 
     const pastHero = topBarBottom >= heroBottom;
@@ -140,10 +159,11 @@ if (aboutSection && heroSection && topBar) {
         aboutSection.classList.add('is-expanded');
 
         // Re-evaluate scroll logic during the CSS transition (1200ms)
-        // so that elements pushed down by the expansion update correctly
+        // Throttled to every 4th frame to avoid layout thrashing
         const startTime = performance.now();
+        let frameCount = 0;
         const tick = (now) => {
-          handleScrollAnimations();
+          if (++frameCount % 4 === 0) handleScrollAnimations();
           if (now - startTime < 1300) {
             requestAnimationFrame(tick);
           }
@@ -1584,7 +1604,7 @@ if (scrollContainer && scrollThumb) {
     const availableHeight = safeBottom - safeTop;
 
     if (availableHeight < 30) {
-      scrollContainer.style.display = 'none';
+      scrollContainer.style.opacity = '0';
       return 0;
     }
 
@@ -1606,7 +1626,7 @@ if (scrollContainer && scrollThumb) {
   const updateThumb = () => {
     const scrollHeight = document.documentElement.scrollHeight - window.innerHeight;
     if (scrollHeight <= 0) {
-      scrollContainer.style.display = 'none';
+      scrollContainer.style.opacity = '0';
       return;
     }
     if (isDragging) return;
@@ -1614,7 +1634,7 @@ if (scrollContainer && scrollThumb) {
     const containerHeight = positionScrollContainer();
     if (containerHeight <= 0) return;
 
-    scrollContainer.style.display = 'block';
+    scrollContainer.style.opacity = '1';
     // Thumb height proportional to viewport
     let thumbHeight = Math.max(30, (window.innerHeight / document.documentElement.scrollHeight) * containerHeight);
     scrollThumb.style.height = `${thumbHeight}px`;
@@ -1626,8 +1646,8 @@ if (scrollContainer && scrollThumb) {
 
   window.addEventListener('scroll', updateThumb, { passive: true });
   window.addEventListener('resize', updateThumb);
-  // Initial calculation
-  setTimeout(updateThumb, 100);
+  // Initial calculation after layout is fully ready
+  window.addEventListener('load', updateThumb);
 
   scrollThumb.addEventListener('pointerdown', (e) => {
     isDragging = true;
