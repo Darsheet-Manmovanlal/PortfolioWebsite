@@ -305,6 +305,160 @@ html.dark-mode .hero {
   margin-bottom: 0;
 }
 
+/* Encapsulated Project Cards */
+.project-card {
+  position: relative;
+  border-radius: 14px;
+  padding: 1.5rem;
+  margin-bottom: 1.5rem;
+  cursor: pointer;
+  
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent;
+  box-shadow: 0 8px 18px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  
+  isolation: isolate;
+  will-change: transform;
+  -webkit-backface-visibility: hidden;
+  backface-visibility: hidden;
+  transform: translate3d(0, 0, 0);
+  transition: transform 300ms ease, box-shadow 300ms ease, border-color 300ms ease;
+}
+
+.project-card::before {
+  content: "";
+  position: absolute;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  z-index: -1;
+  background: rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border-radius: inherit;
+  pointer-events: none;
+  transition: background 300ms ease;
+}
+
+.project-card:last-child {
+  margin-bottom: 0;
+}
+
+.project-card:hover, .project-card:focus-visible {
+  transform: translate3d(0, -4px, 0);
+  border-color: rgba(0, 0, 0, 0.16);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.08);
+  outline: none;
+}
+
+.project-card:hover::before, .project-card:focus-visible::before {
+  background: rgba(0, 0, 0, 0.09);
+}
+
+.project-card h3 {
+  margin-top: 0;
+}
+
+html.dark-mode .project-card {
+  border-color: rgba(255, 255, 255, 0.08);
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+}
+
+html.dark-mode .project-card::before {
+  background: rgba(255, 255, 255, 0.04);
+}
+
+html.dark-mode .project-card:hover, html.dark-mode .project-card:focus-visible {
+  border-color: rgba(255, 255, 255, 0.14);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.14);
+}
+
+html.dark-mode .project-card:hover::before, html.dark-mode .project-card:focus-visible::before {
+  background: rgba(255, 255, 255, 0.08);
+}
+
+/* Project Card Expansion */
+.expandable-card .card-expand-top,
+.expandable-card .card-expand-bottom {
+  max-height: 0;
+  opacity: 0;
+  overflow: hidden;
+  will-change: max-height, opacity, padding, margin;
+  transition: max-height 900ms cubic-bezier(0.34, 1.2, 0.64, 1),
+              opacity 900ms ease,
+              padding 900ms ease,
+              margin 900ms ease;
+}
+
+.expandable-card.is-expanded .card-expand-top {
+  max-height: 100px;
+  opacity: 1;
+  margin-bottom: 1rem;
+}
+
+.expandable-card.is-expanded .card-expand-bottom {
+  max-height: 800px; /* Large enough for canvas */
+  opacity: 1;
+  margin-top: 1.5rem;
+}
+
+/* GitHub Link Styles */
+.github-link {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  color: var(--muted-text);
+  text-decoration: none;
+  font-weight: 500;
+  font-size: 0.95rem;
+  background: rgba(0, 0, 0, 0.04);
+  padding: 8px 16px;
+  border-radius: 20px;
+  transition: color 300ms ease, background 300ms ease;
+}
+
+html.dark-mode .github-link {
+  background: rgba(255, 255, 255, 0.05);
+}
+
+.github-link:hover {
+  color: var(--heading);
+  background: rgba(0, 0, 0, 0.08);
+}
+
+html.dark-mode .github-link:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Java Game Canvas */
+.game-canvas-wrapper {
+  width: 100%;
+  aspect-ratio: 4 / 3;
+  background: #000;
+  border-radius: 8px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  box-shadow: inset 0 0 20px rgba(0,0,0,0.5);
+  position: relative;
+}
+
+.game-loading-text {
+  color: #fff;
+  font-family: monospace;
+  animation: pulse 1.5s infinite;
+}
+
+@keyframes pulse {
+  0% { opacity: 0.5; }
+  50% { opacity: 1; }
+  100% { opacity: 0.5; }
+}
+
 
 h2[id],
 h2#skills,
@@ -312,6 +466,7 @@ h2#projects,
 .section-panel#skills > h2,
 .section-panel#projects > h2 {
   color: var(--heading);
+  margin-top: 0;
   text-decoration: underline;
   text-decoration-color: var(--accent);
   text-decoration-thickness: 2px;
@@ -695,7 +850,7 @@ hr {
 }
 
 .about-section.is-expanded {
-  border-radius: 35% 65% 50% 50% / 30% 45% 55% 70%;
+  border-radius: 32% 55% 50% 50% / 30% 40% 60% 70%;
   padding: 3.5rem 8.5rem 4.5rem 7.5rem;
   border-color: rgba(11, 99, 214, 0.18);
   box-shadow:

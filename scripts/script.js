@@ -1688,3 +1688,63 @@ if (scrollContainer && scrollThumb) {
   scrollThumb.addEventListener('pointerup', stopDragging);
   scrollThumb.addEventListener('pointercancel', stopDragging);
 }
+
+/* ---------- Java Game Embedding via CheerpJ ---------- */
+const javaGameCard = document.getElementById('java-game-card');
+const javaGameContainer = document.getElementById('java-game-container');
+let isCheerpJLoaded = false;
+
+if (javaGameCard && javaGameContainer) {
+  javaGameCard.addEventListener('click', async (e) => {
+    // Prevent collapsing if clicking inside the game or github link
+    if (e.target.closest('a') || e.target.closest('.game-canvas-wrapper')) {
+      return;
+    }
+
+    const isExpanded = javaGameCard.classList.toggle('is-expanded');
+
+    if (isExpanded && !isCheerpJLoaded) {
+      isCheerpJLoaded = true;
+      const loadingText = javaGameContainer.querySelector('.game-loading-text');
+      
+      try {
+        // Initialize CheerpJ with the correct working directory so it can find the 'data' folder
+        const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
+        await cheerpjInit({
+          javaProperties: ["user.dir=/app" + basePath]
+        });
+        
+        // Remove loading text
+        if (loadingText) {
+          loadingText.remove();
+        }
+        
+        // Create display inside our container
+        cheerpjCreateDisplay(-1, -1, javaGameContainer);
+        
+        // Run the main class from the fat JAR
+        // Dynamically resolve the virtual path to LabGame.jar based on where index.html is hosted
+        const jarPath = "/app" + basePath + "/LabGame.jar";
+        console.log("Loading JAR from virtual path:", jarPath);
+        
+        cheerpjRunMain("game.Game", jarPath);
+      } catch (err) {
+        console.error("Failed to load Java Game via CheerpJ:", err);
+        if (loadingText) {
+          loadingText.textContent = "Error: " + (err.message || err.toString());
+          loadingText.style.animation = "none";
+          loadingText.style.color = "#ff6b6b";
+        }
+      }
+    }
+  });
+
+  // Make the card expandable via keyboard (Enter or Space)
+  javaGameCard.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' || e.key === ' ') {
+      e.preventDefault();
+      javaGameCard.click();
+    }
+  });
+}
+
