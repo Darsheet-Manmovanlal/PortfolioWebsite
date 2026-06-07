@@ -1,5 +1,21 @@
+// Track mouse coordinates globally to handle hover states accurately during layout changes
+let currentMouseX = 0;
+let currentMouseY = 0;
+window.addEventListener('mousemove', (e) => {
+  currentMouseX = e.clientX;
+  currentMouseY = e.clientY;
+}, { passive: true });
+
 // Smooth scroll with offset for topbar anchor links
 document.addEventListener('DOMContentLoaded', function () {
+  // Set minimumRenderScale to 1 to ensure full resolution rendering (high res textures)
+  customElements.whenDefined('model-viewer').then(() => {
+    const ModelViewerElement = customElements.get('model-viewer');
+    if (ModelViewerElement) {
+      ModelViewerElement.minimumRenderScale = 1;
+    }
+  });
+
   const topBar = document.querySelector('.top-bar');
   const OFFSET = topBar?.offsetHeight || 80;
   document.querySelectorAll('.top-links a[href^="#"]').forEach(link => {
@@ -143,9 +159,9 @@ if (aboutSection && heroSection && topBar) {
     const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
 
     const pastHero = topBarBottom >= heroBottom;
-    let pastSkills = false;
 
     // Scroll down past last skill
+    let pastSkills = false;
     if (lastSkill) {
       const lastSkillRect = lastSkill.getBoundingClientRect();
       if (lastSkillRect.bottom < window.innerHeight - 50) {
@@ -157,6 +173,54 @@ if (aboutSection && heroSection && topBar) {
     if (pastHero) {
       if (!aboutSection.classList.contains('is-expanded')) {
         aboutSection.classList.add('is-expanded');
+
+        // Spin models using their current HTML camera-orbit values dynamically
+        const sdModel = document.getElementById('sd-model');
+        const kbModel = document.getElementById('kb-model');
+        const guitarModel = document.getElementById('guitar-model');
+        if (sdModel && kbModel) {
+          // Parse dynamic default orbits from HTML attributes
+          const getOrbitParams = (model, defaultVal) => {
+            const orbitAttr = model.getAttribute('camera-orbit') || defaultVal;
+            const parts = orbitAttr.trim().split(/\s+/);
+            const theta = parseFloat(parts[0]) || 0;
+            const phi = parts[1] || '75deg';
+            const radius = parts[2] || '105%';
+            return { raw: orbitAttr, theta, phi, radius };
+          };
+
+          const sdOrbit = getOrbitParams(sdModel, '0deg 75deg 105%');
+          const kbOrbit = getOrbitParams(kbModel, '0deg 75deg 105%');
+          const guitarOrbit = guitarModel ? getOrbitParams(guitarModel, '180deg 75deg 105%') : null;
+
+          setTimeout(() => {
+            const duration = 1500;
+            const startTime = performance.now();
+            function animateSpin(currentTime) {
+              const elapsed = currentTime - startTime;
+              const progress = Math.min(elapsed / duration, 1);
+              const easeProgress = 1 - Math.pow(1 - progress, 3);
+              const spinProgress = -360 + (360 * easeProgress);
+              
+              sdModel.cameraOrbit = `${spinProgress + sdOrbit.theta}deg ${sdOrbit.phi} ${sdOrbit.radius}`;
+              kbModel.cameraOrbit = `${spinProgress + kbOrbit.theta}deg ${kbOrbit.phi} ${kbOrbit.radius}`;
+              if (guitarModel && guitarOrbit) {
+                guitarModel.cameraOrbit = `${spinProgress + guitarOrbit.theta}deg ${guitarOrbit.phi} ${guitarOrbit.radius}`;
+              }
+              
+              if (progress < 1) {
+                requestAnimationFrame(animateSpin);
+              } else {
+                sdModel.cameraOrbit = sdOrbit.raw;
+                kbModel.cameraOrbit = kbOrbit.raw;
+                if (guitarModel && guitarOrbit) {
+                  guitarModel.cameraOrbit = guitarOrbit.raw;
+                }
+              }
+            }
+            requestAnimationFrame(animateSpin);
+          }, 300);
+        }
 
         // Re-evaluate scroll logic during the CSS transition (1200ms)
         // Throttled to every 4th frame to avoid layout thrashing
@@ -178,14 +242,20 @@ if (aboutSection && heroSection && topBar) {
       }
     }
 
-    // Decorations visibility (hides if past skills)
-    if (!pastSkills) {
+    const skillsSectionTop = skillsPanel ? skillsPanel.getBoundingClientRect().top : window.innerHeight;
+    // Require scrolling past the top section and for the skills section to reach the lower third of the viewport to trigger early
+    const isSkillsInView = pastHero && skillsSectionTop < window.innerHeight * 0.85;
+
+    // Decorations visibility (hides when skills section comes into view)
+    if (!isSkillsInView) {
       if (fixedDecorations) {
         fixedDecorations.classList.remove('fade-out');
       }
       if (aboutDecorations) {
         aboutDecorations.classList.remove('fade-out');
       }
+      const bubbles = document.getElementById('liquid-bubbles');
+      if (bubbles) bubbles.classList.remove('show-bubbles');
     } else {
       if (fixedDecorations) {
         fixedDecorations.classList.add('fade-out');
@@ -193,6 +263,8 @@ if (aboutSection && heroSection && topBar) {
       if (aboutDecorations) {
         aboutDecorations.classList.add('fade-out');
       }
+      const bubbles = document.getElementById('liquid-bubbles');
+      if (bubbles) bubbles.classList.add('show-bubbles');
     }
   };
 
@@ -1689,54 +1761,548 @@ if (scrollContainer && scrollThumb) {
   scrollThumb.addEventListener('pointercancel', stopDragging);
 }
 
-/* ---------- Java Game Embedding via CheerpJ ---------- */
+/* ---------- Project Card Expansion ---------- */
 const javaGameCard = document.getElementById('java-game-card');
-const javaGameContainer = document.getElementById('java-game-container');
-let isCheerpJLoaded = false;
 
-if (javaGameCard && javaGameContainer) {
-  javaGameCard.addEventListener('click', async (e) => {
-    // Prevent collapsing if clicking inside the game or github link
-    if (e.target.closest('a') || e.target.closest('.game-canvas-wrapper')) {
+if (javaGameCard) {
+  const PROJECT_CARD_TRANSITION_DURATION = 500;
+  const projectSpriteStage = javaGameCard.querySelector('.project-sprite-stage');
+  const projectSpriteRunner = javaGameCard.querySelector('.project-sprite-runner');
+  const projectSprite = javaGameCard.querySelector('.project-sprite');
+  const projectSpriteActions = {
+    walking: {
+      frames: ['char1.png', 'char2.png', 'char3.png', 'char4.png', 'char5.png'],
+      frameMs: 160,
+      speed: 0.06
+    },
+    running: {
+      frames: ['running1.png', 'running2.png', 'running3.png', 'running4.png'],
+      frameMs: 160,
+      speed: 0.14
+    },
+    punching: {
+      frames: ['punching1.png', 'punching2.png', 'punching3.png', 'punching4.png', 'punching5.png', 'punching6.png', 'punching7.png'],
+      frameMs: 80,
+      duration: 560
+    },
+    kicking: {
+      frames: ['kick1.png'],
+      frameMs: 375,
+      duration: 375
+    }
+  };
+  const projectSpriteBasePath = 'assets/labgame/';
+  let projectSpriteActionTimer = null;
+  let projectSpriteFrameTimer = null;
+  let trackingRAF = null;
+  let lastTrackingTime = 0;
+  let projectSpriteFrameIndex = 0;
+  let projectSpriteX = 0;
+  let projectSpriteBgX = 0;
+  let projectSpriteFacing = 1;
+  let projectSpriteRoutine = [];
+  let projectSpriteComboIndex = 0;
+  let projectSpriteState = 'TRACKING';
+  let cachedSpriteWidth = 0;
+  let combatAnchorMouseX = 0;
+  let patrolDirection = 1;
+  let patrolDecisionAccumulator = 0;
+
+  function stopProjectSprite() {
+    clearTimeout(projectSpriteActionTimer);
+    clearInterval(projectSpriteFrameTimer);
+    if (trackingRAF) cancelAnimationFrame(trackingRAF);
+    projectSpriteActionTimer = null;
+    projectSpriteFrameTimer = null;
+    trackingRAF = null;
+    projectSpriteFrameIndex = 0;
+    projectSpriteRoutine = [];
+    projectSpriteState = 'TRACKING';
+    patrolDirection = 1;
+    patrolDecisionAccumulator = 0;
+    projectSpriteBgX = 0;
+    if (projectSpriteStage) {
+      projectSpriteStage.style.setProperty('--bg-x', '0px');
+    }
+    if (projectSprite) {
+      projectSprite.dataset.action = '';
+      projectSprite.src = `${projectSpriteBasePath}char1.png`;
+    }
+    if (projectSpriteRunner) {
+      projectSpriteRunner.classList.remove('is-tracking');
+      projectSpriteRunner.style.setProperty('--sprite-move-duration', '520ms');
+      projectSpriteRunner.style.setProperty('--sprite-y', '0px');
+    }
+  }
+
+  function getProjectSpriteMaxX() {
+    if (!projectSprite || !projectSpriteStage) return;
+    const stageWidth = projectSpriteStage.clientWidth;
+    if (!cachedSpriteWidth) {
+      cachedSpriteWidth = projectSpriteRunner?.getBoundingClientRect().width || projectSprite.getBoundingClientRect().width || 92;
+    }
+    return Math.max(0, stageWidth - cachedSpriteWidth - 8);
+  }
+
+  function setProjectSpriteFrames(actionName) {
+    const action = projectSpriteActions[actionName];
+    if (!action) return;
+
+    if (projectSprite.dataset.action === actionName) return;
+
+    clearInterval(projectSpriteFrameTimer);
+    projectSpriteFrameIndex = 0;
+    projectSprite.dataset.action = actionName;
+    projectSprite.src = `${projectSpriteBasePath}${action.frames[0]}`;
+
+    projectSpriteFrameTimer = setInterval(() => {
+      projectSpriteFrameIndex = (projectSpriteFrameIndex + 1) % action.frames.length;
+      projectSprite.src = `${projectSpriteBasePath}${action.frames[projectSpriteFrameIndex]}`;
+    }, action.frameMs);
+  }
+
+  function faceProjectSprite(direction) {
+    if (!projectSprite) return;
+    projectSpriteFacing = direction < 0 ? -1 : 1;
+    projectSprite.style.setProperty('--sprite-facing', String(projectSpriteFacing));
+  }
+
+  function turnProjectSprite() {
+    faceProjectSprite(projectSpriteFacing * -1);
+  }
+
+  function spawnBird(direction) {
+    if (!projectSpriteStage) return;
+    const bird = document.createElement('div');
+    bird.className = 'environment-bird';
+    
+    // Random height in the upper 40% of the stage
+    const startY = 10 + Math.random() * 30;
+    bird.style.top = `${startY}%`;
+    
+    // Start slightly off-screen in the direction opposite to flight
+    bird.style.left = direction > 0 ? '-20px' : '100%';
+    bird.style.transform = direction < 0 ? 'scaleX(-1)' : 'none';
+    
+    // Add the two frames for flapping animation
+    bird.innerHTML = `
+      <svg class="bird-frame-1" viewBox="0 0 24 24"><path d="M2 12 Q8 6 12 12 Q16 6 22 12 Q16 10 12 14 Q8 10 2 12 Z"/></svg>
+      <svg class="bird-frame-2" viewBox="0 0 24 24"><path d="M2 12 Q8 18 12 12 Q16 18 22 12 Q16 14 12 10 Q8 14 2 12 Z"/></svg>
+    `;
+    
+    projectSpriteStage.appendChild(bird);
+    
+    const duration = 4000 + Math.random() * 4000;
+    
+    const animation = bird.animate([
+      { left: direction > 0 ? '-20px' : '100%' },
+      { left: direction > 0 ? '100%' : '-20px' }
+    ], {
+      duration: duration,
+      easing: 'linear'
+    });
+    
+    animation.onfinish = () => bird.remove();
+  }
+
+  function projectSpriteTrackingLoop(currentTime) {
+    if (!javaGameCard.classList.contains('is-expanded')) return;
+    
+    const deltaTime = Math.min(currentTime - lastTrackingTime, 100);
+    lastTrackingTime = currentTime;
+
+    if (typeof window.combatCooldown === 'undefined') window.combatCooldown = 0;
+    if (window.combatCooldown > 0) window.combatCooldown -= deltaTime;
+
+    const maxX = getProjectSpriteMaxX() || 0;
+    if (maxX <= 0) {
+      trackingRAF = requestAnimationFrame(projectSpriteTrackingLoop);
       return;
     }
 
-    const isExpanded = javaGameCard.classList.toggle('is-expanded');
+    const stageRect = projectSpriteStage.getBoundingClientRect();
+    const isMouseInStage = currentMouseX >= stageRect.left && currentMouseX <= stageRect.right &&
+                           currentMouseY >= stageRect.top && currentMouseY <= stageRect.bottom;
 
-    if (isExpanded && !isCheerpJLoaded) {
-      isCheerpJLoaded = true;
-      const loadingText = javaGameContainer.querySelector('.game-loading-text');
-      
-      try {
-        // Initialize CheerpJ with the correct working directory so it can find the 'data' folder
-        const basePath = window.location.pathname.substring(0, window.location.pathname.lastIndexOf('/'));
-        await cheerpjInit({
-          javaProperties: ["user.dir=/app" + basePath]
-        });
-        
-        // Remove loading text
-        if (loadingText) {
-          loadingText.remove();
-        }
-        
-        // Create display inside our container
-        cheerpjCreateDisplay(-1, -1, javaGameContainer);
-        
-        // Run the main class from the fat JAR
-        // Dynamically resolve the virtual path to LabGame.jar based on where index.html is hosted
-        const jarPath = "/app" + basePath + "/LabGame.jar";
-        console.log("Loading JAR from virtual path:", jarPath);
-        
-        cheerpjRunMain("game.Game", jarPath);
-      } catch (err) {
-        console.error("Failed to load Java Game via CheerpJ:", err);
-        if (loadingText) {
-          loadingText.textContent = "Error: " + (err.message || err.toString());
-          loadingText.style.animation = "none";
-          loadingText.style.color = "#ff6b6b";
+    if (!isMouseInStage) {
+      if (projectSpriteState === 'COMBAT') {
+        clearTimeout(projectSpriteActionTimer);
+        projectSpriteRoutine = [];
+        window.combatCooldown = 0;
+      }
+      projectSpriteState = 'PATROL';
+
+      const isExploring = (projectSpriteX <= 0 || projectSpriteX >= maxX);
+      const speed = isExploring ? projectSpriteActions.running.speed : projectSpriteActions.walking.speed;
+      const moveAmount = speed * deltaTime;
+      projectSpriteX += patrolDirection * moveAmount;
+      projectSpriteBgX -= patrolDirection * moveAmount * 0.5;
+
+      const bgAspect = 8846 / 771;
+      const renderedBgWidth = stageRect.height * bgAspect;
+      const minBgX = Math.min(0, stageRect.width - renderedBgWidth);
+      const maxBgX = 0;
+
+      let hitMapEdge = false;
+      if (projectSpriteBgX <= minBgX) {
+        projectSpriteBgX = minBgX;
+        hitMapEdge = true;
+      } else if (projectSpriteBgX >= maxBgX) {
+        projectSpriteBgX = maxBgX;
+        hitMapEdge = true;
+      }
+
+      if (projectSpriteX <= 0) {
+        projectSpriteX = 0;
+        if (hitMapEdge) patrolDirection = 1;
+        else if (Math.random() < 0.015) spawnBird(patrolDirection);
+      } else if (projectSpriteX >= Math.max(0, maxX)) {
+        projectSpriteX = maxX;
+        if (hitMapEdge) patrolDirection = -1;
+        else if (Math.random() < 0.015) spawnBird(patrolDirection);
+      }
+
+      patrolDecisionAccumulator += deltaTime;
+      if (patrolDecisionAccumulator >= 1000) {
+        patrolDecisionAccumulator = 0;
+        if (Math.random() < 0.015 && !hitMapEdge) {
+          patrolDirection *= -1;
         }
       }
+
+      faceProjectSprite(patrolDirection);
+      setProjectSpriteFrames(isExploring ? 'running' : 'walking');
+      projectSpriteRunner.classList.add('is-tracking');
+      projectSpriteRunner.style.setProperty('--sprite-x', `${projectSpriteX}px`);
+      projectSpriteStage.style.setProperty('--bg-x', `${projectSpriteBgX}px`);
+
+      trackingRAF = requestAnimationFrame(projectSpriteTrackingLoop);
+      return;
+    } else {
+      if (projectSpriteState === 'PATROL') {
+        projectSpriteState = 'TRACKING';
+      }
     }
+
+    const mouseStageX = currentMouseX - stageRect.left;
+    const spriteCenterX = projectSpriteX + 46;
+    const distanceToMouse = mouseStageX - spriteCenterX;
+    const absDistanceToMouse = Math.abs(distanceToMouse);
+
+    if (projectSpriteState === 'COMBAT') {
+      if (Math.abs(mouseStageX - combatAnchorMouseX) > 15) { 
+        clearTimeout(projectSpriteActionTimer);
+        projectSpriteRoutine = [];
+        projectSpriteState = 'TRACKING';
+        window.combatCooldown = 600;
+      } else {
+        trackingRAF = requestAnimationFrame(projectSpriteTrackingLoop);
+        return;
+      }
+    }
+
+    if (absDistanceToMouse <= 30 && window.combatCooldown <= 0) {
+      projectSpriteState = 'COMBAT';
+      projectSpriteRunner.classList.remove('is-tracking');
+      combatAnchorMouseX = mouseStageX;
+      faceProjectSprite(distanceToMouse >= 0 ? 1 : -1);
+      if (projectSpriteComboIndex === 0) {
+        projectSpriteComboIndex = 1;
+        
+        projectSpriteRoutine = [
+          { type: 'combat', action: 'punching' },
+          { type: 'combat', action: 'punching' },
+          { type: 'combat', action: 'punching' },
+          { type: 'combat', action: 'kicking' }
+        ];
+      } else {
+        projectSpriteComboIndex = 0;
+        projectSpriteRoutine = [
+          { type: 'combat', action: 'kicking' },
+          { type: 'combat', action: 'kicking' },
+          { type: 'combat', action: 'punching' },
+          { type: 'combat', action: 'punching' },
+          { type: 'combat', action: 'punching' },
+          { type: 'combat', action: 'punching' },
+          { type: 'combat', action: 'kicking' }
+        ];
+      }
+      runNextProjectSpriteStep();
+      trackingRAF = requestAnimationFrame(projectSpriteTrackingLoop);
+      return;
+    }
+
+    let isRunning = projectSprite.dataset.action === 'running';
+    if (absDistanceToMouse > 120) isRunning = true;
+    if (absDistanceToMouse < 60) isRunning = false;
+    
+    const speed = isRunning ? projectSpriteActions.running.speed : projectSpriteActions.walking.speed;
+    const moveAmount = speed * deltaTime;
+
+    if (absDistanceToMouse > 25) {
+      const direction = distanceToMouse > 0 ? 1 : -1;
+      const step = Math.min(moveAmount, absDistanceToMouse);
+      const oldX = projectSpriteX;
+      projectSpriteX += direction * step;
+      projectSpriteX = Math.max(0, Math.min(maxX, projectSpriteX));
+      
+      const actualStep = Math.abs(projectSpriteX - oldX);
+      if (actualStep > 0) {
+        projectSpriteBgX -= direction * actualStep * 0.5;
+        
+        const bgAspect = 8846 / 771;
+        const renderedBgWidth = stageRect.height * bgAspect;
+        const minBgX = Math.min(0, stageRect.width - renderedBgWidth);
+        
+        projectSpriteBgX = Math.max(minBgX, Math.min(0, projectSpriteBgX));
+      }
+
+      faceProjectSprite(direction);
+      
+      setProjectSpriteFrames(isRunning ? 'running' : 'walking');
+      projectSpriteRunner.classList.add('is-tracking');
+      projectSpriteRunner.style.setProperty('--sprite-x', `${projectSpriteX}px`);
+      projectSpriteStage.style.setProperty('--bg-x', `${projectSpriteBgX}px`);
+    } else {
+      if (projectSprite.dataset.action !== '') {
+        clearInterval(projectSpriteFrameTimer);
+        projectSprite.dataset.action = '';
+        projectSprite.src = `${projectSpriteBasePath}char1.png`;
+      }
+    }
+
+    trackingRAF = requestAnimationFrame(projectSpriteTrackingLoop);
+  }
+
+  function runNextProjectSpriteStep() {
+    if (!projectSprite || !projectSpriteRunner || !projectSpriteStage || !javaGameCard.classList.contains('is-expanded')) return;
+
+    const step = projectSpriteRoutine.shift();
+    if (!step) {
+      projectSpriteState = 'TRACKING';
+      return;
+    }
+
+    if (step.type === 'turn') {
+      turnProjectSprite();
+      projectSpriteActionTimer = setTimeout(runNextProjectSpriteStep, 240);
+      return;
+    }
+
+    const action = projectSpriteActions[step.action];
+    if (!action) {
+      projectSpriteActionTimer = setTimeout(runNextProjectSpriteStep, 0);
+      return;
+    }
+
+    setProjectSpriteFrames(step.action);
+
+    let duration = action.duration || 420;
+
+    if (step.type === 'moveTo') {
+      const nextX = Math.min(getProjectSpriteMaxX() || 0, Math.max(0, step.x));
+      if (Math.abs(nextX - projectSpriteX) > 2) {
+        faceProjectSprite(nextX > projectSpriteX ? 1 : -1);
+      }
+      const distance = Math.abs(nextX - projectSpriteX);
+      
+      duration = Math.max(420, Math.min(1300, distance / action.speed));
+
+      projectSpriteRunner.style.setProperty('--sprite-move-duration', `${Math.round(duration)}ms`);
+      projectSpriteRunner.style.setProperty('--sprite-y', '0px');
+      projectSpriteRunner.style.setProperty('--sprite-x', `${Math.round(nextX)}px`);
+      projectSpriteX = nextX;
+    } else {
+      projectSpriteRunner.style.setProperty('--sprite-move-duration', `${Math.round(duration)}ms`);
+      projectSpriteRunner.style.setProperty('--sprite-y', '0px');
+    }
+
+    projectSpriteActionTimer = setTimeout(() => {
+      runNextProjectSpriteStep();
+    }, duration + (step.type === 'combat' ? 100 : 140));
+  }
+
+  function startProjectSprite() {
+    if (!projectSprite || !projectSpriteRunner || !projectSpriteStage) return;
+
+    stopProjectSprite();
+    projectSpriteRoutine = [];
+    projectSpriteState = 'TRACKING';
+    projectSpriteX = Math.round((getProjectSpriteMaxX() || 0) * 0.06);
+    faceProjectSprite(1);
+    patrolDirection = 1;
+    patrolDecisionAccumulator = 0;
+    projectSpriteRunner.classList.add('is-tracking');
+    projectSpriteRunner.style.setProperty('--sprite-x', `${Math.round(projectSpriteX)}px`);
+    projectSpriteRunner.style.setProperty('--sprite-y', '0px');
+    lastTrackingTime = performance.now();
+    trackingRAF = requestAnimationFrame(projectSpriteTrackingLoop);
+  }
+
+  function setProjectFlightBounds(card, rect) {
+    card.style.left = `${rect.left}px`;
+    card.style.top = `${rect.top}px`;
+    card.style.width = `${rect.width}px`;
+    card.style.height = `${rect.height}px`;
+    if (rect.rot && rect.rot !== '0deg') {
+      card.style.transform = `rotate(${rect.rot})`;
+    } else {
+      card.style.transform = '';
+    }
+  }
+
+  function createProjectFlightCard(expanded) {
+    const clone = javaGameCard.cloneNode(true);
+    clone.removeAttribute('id');
+    clone.querySelectorAll('[id]').forEach((element) => element.removeAttribute('id'));
+    clone.querySelectorAll('a, button, input').forEach((element) => {
+      element.setAttribute('tabindex', '-1');
+    });
+    clone.classList.add('project-card-flight');
+    clone.style.position = 'absolute';
+    clone.style.zIndex = '10000';
+    clone.style.margin = '0';
+    clone.style.pointerEvents = 'none';
+    clone.classList.toggle('is-expanded', expanded);
+    clone.classList.remove('is-project-hidden', 'is-project-animating');
+    if (javaGameCard.matches(':hover')) {
+      clone.classList.add('is-hover-locked');
+    }
+    clone.addEventListener('mouseleave', () => {
+      clone.classList.remove('is-hover-locked');
+    });
+    return clone;
+  }
+
+  function setJavaGameExpanded(expand) {
+    if (javaGameCard.classList.contains('is-expanded') === expand || javaGameCard.classList.contains('is-project-animating')) {
+      return;
+    }
+
+    stopProjectSprite();
+    if (javaGameCard._removeHoverLock) {
+      javaGameCard._removeHoverLock();
+    }
+    javaGameCard.classList.add('is-project-animating');
+
+    // Measure bounding box in base/unhovered state to avoid layout calculation offsets
+    javaGameCard.classList.add('no-transform-instant');
+    const sourceRectRaw = javaGameCard.getBoundingClientRect();
+    javaGameCard.classList.remove('no-transform-instant');
+
+    const sourceRect = {
+      left: sourceRectRaw.left + window.scrollX,
+      top: sourceRectRaw.top + window.scrollY,
+      width: sourceRectRaw.width,
+      height: sourceRectRaw.height,
+      rot: '0deg'
+    };
+
+    const flightCard = createProjectFlightCard(!expand);
+    document.body.appendChild(flightCard);
+    flightCard.style.transition = 'none';
+    setProjectFlightBounds(flightCard, sourceRect);
+
+    javaGameCard.classList.add('is-project-hidden');
+    javaGameCard.classList.toggle('is-expanded', expand);
+
+    const targetRectRaw = javaGameCard.getBoundingClientRect();
+    const targetRect = {
+      left: targetRectRaw.left + window.scrollX,
+      top: targetRectRaw.top + window.scrollY,
+      width: targetRectRaw.width,
+      height: targetRectRaw.height,
+      rot: '0deg'
+    };
+
+    javaGameCard.style.height = `${sourceRect.height}px`;
+    void javaGameCard.offsetWidth;
+    javaGameCard.style.transition = `height ${PROJECT_CARD_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`;
+    javaGameCard.style.height = `${targetRect.height}px`;
+
+    void flightCard.offsetWidth;
+
+    flightCard.classList.toggle('is-expanded', expand);
+    flightCard.style.transition = [
+      `left ${PROJECT_CARD_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `top ${PROJECT_CARD_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `width ${PROJECT_CARD_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `height ${PROJECT_CARD_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `transform ${PROJECT_CARD_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `box-shadow ${PROJECT_CARD_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`,
+      `opacity ${PROJECT_CARD_TRANSITION_DURATION}ms cubic-bezier(0.4, 0, 0.2, 1)`
+    ].join(', ');
+    setProjectFlightBounds(flightCard, targetRect);
+
+    window.setTimeout(() => {
+      // While the card is still hidden (visibility:hidden) and transitions
+      // are still disabled (is-project-animating), check if the mouse is
+      // over the card and apply hover-lock so the very first visible frame
+      // already has the hovered appearance.
+      const rect = javaGameCard.getBoundingClientRect();
+      const isMouseInside = (
+        currentMouseX >= rect.left &&
+        currentMouseX <= rect.right &&
+        currentMouseY >= rect.top &&
+        currentMouseY <= rect.bottom
+      );
+
+      // Disable transitions temporarily to prevent any hover-state transition flicker
+      javaGameCard.classList.add('no-transition-instant');
+
+      if (isMouseInside) {
+        if (javaGameCard._removeHoverLock) {
+          javaGameCard._removeHoverLock();
+        }
+        javaGameCard.classList.add('is-hover-locked');
+        const removeLock = () => {
+          javaGameCard.classList.remove('is-hover-locked');
+          javaGameCard.removeEventListener('mouseleave', removeLock);
+          javaGameCard._removeHoverLock = null;
+        };
+        javaGameCard._removeHoverLock = removeLock;
+        javaGameCard.addEventListener('mouseleave', removeLock);
+      } else {
+        if (javaGameCard._removeHoverLock) {
+          javaGameCard._removeHoverLock();
+        }
+        javaGameCard.classList.remove('is-hover-locked');
+      }
+
+      // Make the original card visible and finalize its styles while
+      // it is still behind the flight card (z-index 10000), so the
+      // user can't see any intermediate state.
+      javaGameCard.classList.remove('is-project-hidden');
+      void javaGameCard.offsetWidth;
+      javaGameCard.classList.remove('is-project-animating');
+      javaGameCard.style.transition = '';
+      javaGameCard.style.height = '';
+
+      // Force styles to apply without transitions
+      void javaGameCard.offsetWidth;
+
+      // NOW remove the flight card — the original card is already
+      // fully visible and styled underneath, so there's no flash.
+      flightCard.remove();
+
+      if (expand) {
+        startProjectSprite();
+      }
+
+      // Re-enable transitions in the next frame
+      requestAnimationFrame(() => {
+        javaGameCard.classList.remove('no-transition-instant');
+      });
+    }, PROJECT_CARD_TRANSITION_DURATION + 40);
+  }
+
+  javaGameCard.addEventListener('click', (e) => {
+    // Prevent collapsing if clicking inside the media placeholders or github link
+    if (e.target.closest('a') || e.target.closest('.media-placeholders')) {
+      return;
+    }
+
+    setJavaGameExpanded(!javaGameCard.classList.contains('is-expanded'));
   });
 
   // Make the card expandable via keyboard (Enter or Space)
@@ -1745,6 +2311,92 @@ if (javaGameCard && javaGameContainer) {
       e.preventDefault();
       javaGameCard.click();
     }
+  });
+
+  window.addEventListener('resize', () => {
+    if (!javaGameCard.classList.contains('is-expanded') || !projectSprite || !projectSpriteRunner || !projectSpriteStage) return;
+
+    const maxX = getProjectSpriteMaxX() || 0;
+    projectSpriteX = Math.min(projectSpriteX, maxX);
+    projectSpriteRunner.style.setProperty('--sprite-x', `${Math.round(projectSpriteX)}px`);
+  }, { passive: true });
+}
+
+/* ---------- About Me Blob Pagination ---------- */
+const blobPrevBtn = document.querySelector('.circular-glass-btn-left');
+const blobNextBtn = document.querySelector('.circular-glass-btn-right');
+const blobDots = document.querySelectorAll('.about-blob-song-pill .viewer-music-song-dot');
+const blobImageCards = Array.from(document.querySelectorAll('.about-expanded .about-card:not(.about-card-music) .about-card-image'));
+const blobActiveIndicator = document.querySelector('.about-blob-song-pill .viewer-music-song-active-indicator');
+
+const blobPages = [
+  ['images/image1.jpg', 'images/image2.jpg', 'images/image.3jpg.jpg', 'images/image4.jpg', 'images/image5.jpg'],
+  ['images/image6.jpg', 'images/image7.jpg', 'images/image8.jpg', 'images/image9.jpg', 'images/image10.jpg']
+];
+
+let currentBlobPage = 0;
+let isBlobAnimating = false;
+
+function updateBlobIndicator(index) {
+  blobDots.forEach((dot, i) => {
+    dot.classList.toggle('is-active', i === index);
+  });
+  if (blobDots[index] && blobActiveIndicator) {
+    const targetLeft = blobDots[index].offsetLeft;
+    const targetWidth = blobDots[index].offsetWidth;
+    const currentLeft = parseFloat(getComputedStyle(blobActiveIndicator).left) || targetLeft;
+    const currentWidth = parseFloat(getComputedStyle(blobActiveIndicator).width) || targetWidth;
+    
+    blobActiveIndicator.style.setProperty('--start-left', `${currentLeft}px`);
+    blobActiveIndicator.style.setProperty('--start-width', `${currentWidth}px`);
+    
+    const minLeft = Math.min(currentLeft, targetLeft);
+    const maxRight = Math.max(currentLeft + currentWidth, targetLeft + targetWidth);
+    blobActiveIndicator.style.setProperty('--min-left', `${minLeft}px`);
+    blobActiveIndicator.style.setProperty('--stretch-width', `${maxRight - minLeft}px`);
+    
+    blobActiveIndicator.style.setProperty('--end-left', `${targetLeft}px`);
+    blobActiveIndicator.style.setProperty('--end-width', `${targetWidth}px`);
+    
+    blobActiveIndicator.classList.remove('is-stretching');
+    void blobActiveIndicator.offsetWidth; // reflow
+    blobActiveIndicator.classList.add('is-stretching');
+  }
+}
+
+async function goToBlobPage(pageIndex) {
+  if (isBlobAnimating || pageIndex === currentBlobPage || pageIndex < 0 || pageIndex >= blobPages.length) return;
+  isBlobAnimating = true;
+  
+  blobPrevBtn.style.opacity = pageIndex === 0 ? '0.3' : '1';
+  blobPrevBtn.style.pointerEvents = pageIndex === 0 ? 'none' : 'auto';
+  blobNextBtn.style.opacity = pageIndex === blobPages.length - 1 ? '0.3' : '1';
+  blobNextBtn.style.pointerEvents = pageIndex === blobPages.length - 1 ? 'none' : 'auto';
+  
+  updateBlobIndicator(pageIndex);
+  
+  currentBlobPage = pageIndex;
+  
+  blobImageCards.forEach((img, i) => {
+    img.src = blobPages[pageIndex][i];
+  });
+  
+  isBlobAnimating = false;
+}
+
+if (blobPrevBtn && blobNextBtn) {
+  blobPrevBtn.style.opacity = '0.3';
+  blobPrevBtn.style.pointerEvents = 'none';
+  
+  blobPrevBtn.addEventListener('click', () => goToBlobPage(currentBlobPage - 1));
+  blobNextBtn.addEventListener('click', () => goToBlobPage(currentBlobPage + 1));
+  
+  blobDots.forEach((dot, index) => {
+    dot.addEventListener('click', () => {
+      if (index < blobPages.length) {
+        goToBlobPage(index);
+      }
+    });
   });
 }
 

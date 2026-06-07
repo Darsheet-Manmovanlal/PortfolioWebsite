@@ -1,104 +1,162 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Portfolio</title>
-    <script>
-        document.documentElement.classList.add('no-transition');
-        if (localStorage.getItem('dark-mode') === 'true') {
-            document.documentElement.classList.add('dark-mode');
-        }
-    </script>
-    <link rel="stylesheet" href="styles/styles.css">
-    <script src="scripts/script.js" defer></script>
-    <script src="https://cjrtnc.leaningtech.com/3.0/cj3loader.js"></script>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Portfolio</title>
+  <script>
+    document.documentElement.classList.add('no-transition');
+    if (localStorage.getItem('dark-mode') === 'true') {
+      document.documentElement.classList.add('dark-mode');
+    }
+  </script>
+  <link rel="stylesheet" href="styles/styles.css">
+  <script type="module" src="https://ajax.googleapis.com/ajax/libs/model-viewer/3.4.0/model-viewer.min.js"></script>
+  <script src="scripts/script.js" defer></script>
 </head>
+
 <body>
-    <header class="hero" align="center">
+  <header class="hero" align="center">
+    <div class="hero-content">
+      <a href="https://www.linkedin.com/in/darsheet-manmovanlal-04542b1ba/" target="_blank" rel="noopener noreferrer"
+        class="github-link hero-glass-btn" style="gap: 2px;">
+        Visit Linked
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+          <path
+            d="M19 0h-14c-2.761 0-5 2.239-5 5v14c0 2.761 2.239 5 5 5h14c2.762 0 5-2.239 5-5v-14c0-2.761-2.238-5-5-5zm-11 19h-3v-11h3v11zm-1.5-12.268c-.966 0-1.75-.79-1.75-1.764s.784-1.764 1.75-1.764 1.75.79 1.75 1.764-.783 1.764-1.75 1.764zm13.5 12.268h-3v-5.604c0-3.368-4-3.113-4 0v5.604h-3v-11h3v1.765c1.396-2.586 7-2.777 7 2.476v6.759z" />
+        </svg>
+      </a>
+      <div class="hero-text">
         <h1>Hi, I'm Darsheet Manmovanlal</h1>
         <p>Welcome to my portfolio!</p>
-        <nav class="top-bar" aria-label="Useful links">
-            <ul class="top-links">
-                <li><a href="#about">About Me</a></li>
-                <li><a href="#skills">Skills+Education</a></li>
-                <li><a href="#projects">My Projects</a></li>
-                <li><a href="#experience">Past Experience</a></li>
-                <li><a href="#contact">Contact Me</a></li>
-            </ul>
-            <input type="search" class="search-bar" placeholder="Search..." aria-label="Search">
-            <button id="dark-mode-toggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
-                <span class="toggle-track">
-                    <span class="toggle-thumb"></span>
-                </span>
-            </button>
-        </nav>
-    </header>
+      </div>
+      <a href="assets/darsheet_manmovanlal_cv.pdf" download class="github-link hero-glass-btn">
+        Download CV
+        <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16" style="flex-shrink: 0;">
+          <path d="M19 9h-4V3H9v6H5l7 7 7-7zM5 18v2h14v-2H5z" />
+        </svg>
+      </a>
+    </div>
+    <nav class="top-bar" aria-label="Useful links">
+      <ul class="top-links">
+        <li><a href="#about">About Me</a></li>
+        <li><a href="#skills">Skills+Education</a></li>
+        <li><a href="#projects">My Projects</a></li>
+        <li><a href="#experience">Past Experience</a></li>
+        <li><a href="#contact">Contact Me</a></li>
+      </ul>
+      <input type="search" class="search-bar" placeholder="Search..." aria-label="Search">
+      <button id="dark-mode-toggle" class="dark-mode-toggle" aria-label="Toggle dark mode">
+        <span class="toggle-track">
+          <span class="toggle-thumb"></span>
+        </span>
+      </button>
+    </nav>
+  </header>
 
-    <main class="container">
-      <section class="section-panel about-section" id="about-section">
+  <main class="container">
+    <section class="section-panel about-section" id="about-section">
+      <div class="about-header-container">
         <h2 id="about">About Me</h2>
-        <p>A strong passion with cutting edge computers/systems, keeping up-to-date on the latest trends, alongside a heavy interest in photography. Also, I love creating song covers, whether it's with my friends or independently. Music allows me to express my creativity and connect with others through its very own universal language.</p>
+        <div class="about-models-container">
+          <model-viewer id="kb-model" src="assets/aula_f75_mechanical_keyboard.glb" camera-controls disable-zoom
+            interaction-prompt="none" camera-orbit="0deg 75deg 105%" loading="lazy">
+            <div class="grab-blocker"></div>
+            <div slot="progress-bar"></div>
+          </model-viewer>
+          <model-viewer id="sd-model" src="assets/steam_deck.glb" camera-controls disable-zoom interaction-prompt="none"
+            camera-orbit="0deg 75deg 105%" loading="lazy">
+            <div class="grab-blocker"></div>
+            <div slot="progress-bar"></div>
+          </model-viewer>
+          <model-viewer id="guitar-model" src="assets/classic_guitar.glb" camera-controls disable-zoom
+            interaction-prompt="none" camera-orbit="180deg 75deg 105%" orientation="-85deg 0deg 0deg" loading="lazy">
+            <div class="grab-blocker"></div>
+            <div slot="progress-bar"></div>
+          </model-viewer>
+        </div>
+      </div>
+      <p>A strong passion with cutting edge computers/systems, keeping up-to-date on the latest trends, alongside a
+        heavy interest in photography. Also, I love creating song covers, whether it's with my friends or independently.
+        Music allows me to express my creativity and connect with others through its very own universal language.</p>
 
-        <div class="about-expanded" style="position: relative;">
-          <div class="about-card" style="--rot:-3deg; --delay:0ms">
-            <img class="about-card-image" src="images/image1.jpg" alt="Photography sample 1" loading="lazy">
-          </div>
-          <div class="about-card" style="--rot:5deg; --delay:60ms">
-            <img class="about-card-image" src="images/image2.jpg" alt="Photography sample 2" loading="lazy">
-          </div>
-          <div class="about-card" style="--rot:-2deg; --delay:120ms">
-            <img class="about-card-image" src="images/image.3jpg.jpg" alt="Photography sample 3" loading="lazy">
-          </div>
-          <div class="about-card" style="--rot:4deg; --delay:180ms">
-            <img class="about-card-image" src="images/image4.jpg" alt="Photography sample 4" loading="lazy">
-          </div>
-          <div class="about-card about-card-music" id="about-music-card" style="--rot:-4deg; --delay:240ms" role="button" tabindex="0" aria-label="Open BandLab cover player">
-            <div class="music-player" id="about-music-player">
-              <div class="viewer-music-volume viewer-music-volume-preview">
-                <button class="viewer-music-volume-btn" id="about-music-volume-btn" type="button" aria-label="Mute cover">
-                  <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="4,9 8,9 13,4 13,20 8,15 4,15"></polygon>
-                    <path class="vol-wave vol-wave-1" d="M16 8.5C17.1 9.5 17.75 10.7 17.75 12C17.75 13.3 17.1 14.5 16 15.5" pathLength="1"></path>
-                    <path class="vol-wave vol-wave-2" d="M18.6 6C20.2 7.7 21 9.7 21 12C21 14.3 20.2 16.3 18.6 18" pathLength="1"></path>
-                    <path class="vol-wave vol-wave-3" d="M21.2 3.5C23.3 5.5 24.25 8.2 24.25 12C24.25 15.8 23.3 18.5 21.2 20.5" pathLength="1"></path>
-                    <path class="vol-cross vol-cross-1" d="M17 9L21 13" pathLength="1"></path>
-                    <path class="vol-cross vol-cross-2" d="M21 9L17 13" pathLength="1"></path>
-                  </svg>
-                </button>
-                <input class="viewer-music-volume-slider" id="about-music-volume-slider" type="range" min="0" max="1" step="0.01" value="1" aria-label="Cover volume">
-              </div>
-              <div class="viewer-music-header">
-                <span class="viewer-music-kicker">BANDLAB COVER</span>
-                <h3 class="viewer-music-title">Don't say that<br>you love me -<br>Jin (cover)</h3>
-              </div>
-              <button class="viewer-music-play" id="about-music-play" type="button" aria-label="Play cover">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path class="play-pause-path" d="M 7 4 L 13.5 8 L 13.5 16 L 7 20 Z M 13.5 8 L 20 12 L 20 12 L 13.5 16 Z" />
+      <div class="about-expanded" style="position: relative;">
+        <button class="circular-glass-btn circular-glass-btn-left" aria-label="Previous">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M20 10h-9v-3.5c0-.9-1.1-1.3-1.7-.7l-6.5 6.5c-.4.4-.4 1 0 1.4l6.5 6.5c.6.6 1.7.2 1.7-.7V16h9c1.1 0 2-.9 2-2v-2c0-1.1-.9-2-2-2z"/>
+          </svg>
+        </button>
+        <button class="circular-glass-btn circular-glass-btn-right" aria-label="Next">
+          <svg viewBox="0 0 24 24" fill="currentColor" width="24" height="24">
+            <path d="M4 10h9v-3.5c0-.9 1.1-1.3 1.7-.7l6.5 6.5c.4.4.4 1 0 1.4l-6.5 6.5c-.6.6-1.7.2-1.7-.7V16H4c-1.1 0-2-.9-2-2v-2c0-1.1.9-2 2-2z"/>
+          </svg>
+        </button>
+        <div class="viewer-music-song-pill about-blob-song-pill">
+          <div class="viewer-music-song-active-indicator" style="left: 0.42rem; width: 0.46rem;"></div>
+          <button class="viewer-music-song-dot is-active" aria-label="Page 1"></button>
+          <button class="viewer-music-song-dot" aria-label="Page 2"></button>
+        </div>
+        <div class="about-card" style="--rot:-3deg; --delay:0ms">
+          <img class="about-card-image" src="images/image1.jpg" alt="Photography sample 1" loading="lazy">
+        </div>
+        <div class="about-card" style="--rot:5deg; --delay:60ms">
+          <img class="about-card-image" src="images/image2.jpg" alt="Photography sample 2" loading="lazy">
+        </div>
+        <div class="about-card" style="--rot:-2deg; --delay:120ms">
+          <img class="about-card-image" src="images/image.3jpg.jpg" alt="Photography sample 3" loading="lazy">
+        </div>
+        <div class="about-card" style="--rot:4deg; --delay:180ms">
+          <img class="about-card-image" src="images/image4.jpg" alt="Photography sample 4" loading="lazy">
+        </div>
+        <div class="about-card about-card-music" id="about-music-card" style="--rot:-4deg; --delay:240ms" role="button"
+          tabindex="0" aria-label="Open BandLab cover player">
+          <div class="music-player" id="about-music-player">
+            <div class="viewer-music-volume viewer-music-volume-preview">
+              <button class="viewer-music-volume-btn" id="about-music-volume-btn" type="button" aria-label="Mute cover">
+                <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="4,9 8,9 13,4 13,20 8,15 4,15"></polygon>
+                  <path class="vol-wave vol-wave-1"
+                    d="M16 8.5C17.1 9.5 17.75 10.7 17.75 12C17.75 13.3 17.1 14.5 16 15.5" pathLength="1"></path>
+                  <path class="vol-wave vol-wave-2" d="M18.6 6C20.2 7.7 21 9.7 21 12C21 14.3 20.2 16.3 18.6 18"
+                    pathLength="1"></path>
+                  <path class="vol-wave vol-wave-3"
+                    d="M21.2 3.5C23.3 5.5 24.25 8.2 24.25 12C24.25 15.8 23.3 18.5 21.2 20.5" pathLength="1"></path>
+                  <path class="vol-cross vol-cross-1" d="M17 9L21 13" pathLength="1"></path>
+                  <path class="vol-cross vol-cross-2" d="M21 9L17 13" pathLength="1"></path>
                 </svg>
               </button>
+              <input class="viewer-music-volume-slider" id="about-music-volume-slider" type="range" min="0" max="1"
+                step="0.01" value="1" aria-label="Cover volume">
             </div>
-          </div>
-          <div class="about-card" style="--rot:3deg; --delay:300ms">
-            <img class="about-card-image" src="images/image5.jpg" alt="Photography sample 5" loading="lazy">
-          </div>
-
-          <div class="about-image-viewer" id="about-image-viewer">
-            <button class="viewer-back-btn" id="viewer-back-btn" aria-label="Back">
-              <svg viewBox="0 0 24 24" fill="currentColor"><polygon points="16,4 6,12 16,20"/></svg>
+            <div class="viewer-music-header">
+              <span class="viewer-music-kicker">BANDLAB COVER</span>
+              <h3 class="viewer-music-title">Don't say that<br>you love me -<br>Jin (cover)</h3>
+            </div>
+            <button class="viewer-music-play" id="about-music-play" type="button" aria-label="Play cover">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path class="play-pause-path"
+                  d="M 7 4 L 13.5 8 L 13.5 16 L 7 20 Z M 13.5 8 L 20 12 L 20 12 L 13.5 16 Z" />
+              </svg>
             </button>
-            <img src="" alt="Expanded View" class="viewer-image" id="viewer-image">
-            <div class="viewer-music" id="viewer-music" aria-hidden="true">
-              <audio
-                id="about-music-audio"
-                src="audio/jin.mp4"
-                preload="metadata"
-                data-title="Don't say that|you love me -|Jin (cover)"
-                data-kicker="BANDLAB COVER"
-                data-duration-seconds="180"
-                data-min-visible-gap-pixels="8"
-                data-edge-inset-seconds="4"
-                data-segments='[
+          </div>
+        </div>
+        <div class="about-card" style="--rot:3deg; --delay:300ms">
+          <img class="about-card-image" src="images/image5.jpg" alt="Photography sample 5" loading="lazy">
+        </div>
+
+        <div class="about-image-viewer" id="about-image-viewer">
+          <button class="viewer-back-btn" id="viewer-back-btn" aria-label="Back">
+            <svg viewBox="0 0 24 24" fill="currentColor">
+              <polygon points="16,4 6,12 16,20" />
+            </svg>
+          </button>
+          <img src="" alt="Expanded View" class="viewer-image" id="viewer-image">
+          <div class="viewer-music" id="viewer-music" aria-hidden="true">
+            <audio id="about-music-audio" src="audio/jin.mp4" preload="metadata"
+              data-title="Don't say that|you love me -|Jin (cover)" data-kicker="BANDLAB COVER"
+              data-duration-seconds="180" data-min-visible-gap-pixels="8" data-edge-inset-seconds="4" data-segments='[
                   {"start":16,"end":70,"label":"Reign","color":"#60a5fa"},
                   {"start":72,"end":89,"label":"Darsheet","color":"#f59e0b"},
                   {"start":89,"end":108,"label":"Both","color":"#34d399"},
@@ -106,253 +164,397 @@
                   {"start":120,"end":141,"label":"Reign + Darsheet adlibs","color":"#a78bfa"},
                   {"start":141,"end":180,"label":"Both","color":"#34d399"}
                 ]'></audio>
-              <div class="viewer-music-volume viewer-music-volume-expanded">
-                <button class="viewer-music-volume-btn" id="viewer-music-volume-btn" type="button" aria-label="Mute cover">
-                  <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round">
-                    <polygon points="4,9 8,9 13,4 13,20 8,15 4,15"></polygon>
-                    <path class="vol-wave vol-wave-1" d="M16 8.5C17.1 9.5 17.75 10.7 17.75 12C17.75 13.3 17.1 14.5 16 15.5" pathLength="1"></path>
-                    <path class="vol-wave vol-wave-2" d="M18.6 6C20.2 7.7 21 9.7 21 12C21 14.3 20.2 16.3 18.6 18" pathLength="1"></path>
-                    <path class="vol-wave vol-wave-3" d="M21.2 3.5C23.3 5.5 24.25 8.2 24.25 12C24.25 15.8 23.3 18.5 21.2 20.5" pathLength="1"></path>
-                    <path class="vol-cross vol-cross-1" d="M17 9L21 13" pathLength="1"></path>
-                    <path class="vol-cross vol-cross-2" d="M21 9L17 13" pathLength="1"></path>
-                  </svg>
-                </button>
-                <input class="viewer-music-volume-slider" id="viewer-music-volume-slider" type="range" min="0" max="1" step="0.01" value="1" aria-label="Cover volume">
-              </div>
-              <div class="viewer-music-header">
-                <span class="viewer-music-kicker">BANDLAB COVER</span>
-                <h3 class="viewer-music-title">Don't say that<br>you love me -<br>Jin (cover)</h3>
-              </div>
-              <button class="viewer-music-play" id="viewer-music-play" type="button" aria-label="Play cover">
-                <svg viewBox="0 0 24 24" fill="currentColor">
-                  <path class="play-pause-path" d="M 7 4 L 13.5 8 L 13.5 16 L 7 20 Z M 13.5 8 L 20 12 L 20 12 L 13.5 16 Z" />
+            <div class="viewer-music-volume viewer-music-volume-expanded">
+              <button class="viewer-music-volume-btn" id="viewer-music-volume-btn" type="button"
+                aria-label="Mute cover">
+                <svg class="volume-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2"
+                  stroke-linecap="round" stroke-linejoin="round">
+                  <polygon points="4,9 8,9 13,4 13,20 8,15 4,15"></polygon>
+                  <path class="vol-wave vol-wave-1"
+                    d="M16 8.5C17.1 9.5 17.75 10.7 17.75 12C17.75 13.3 17.1 14.5 16 15.5" pathLength="1"></path>
+                  <path class="vol-wave vol-wave-2" d="M18.6 6C20.2 7.7 21 9.7 21 12C21 14.3 20.2 16.3 18.6 18"
+                    pathLength="1"></path>
+                  <path class="vol-wave vol-wave-3"
+                    d="M21.2 3.5C23.3 5.5 24.25 8.2 24.25 12C24.25 15.8 23.3 18.5 21.2 20.5" pathLength="1"></path>
+                  <path class="vol-cross vol-cross-1" d="M17 9L21 13" pathLength="1"></path>
+                  <path class="vol-cross vol-cross-2" d="M21 9L17 13" pathLength="1"></path>
                 </svg>
               </button>
-              <div class="viewer-music-times">
-                <span id="viewer-music-current">0:00</span>
-                <span id="viewer-music-duration">3:00</span>
-              </div>
-              <div class="viewer-music-progress" id="viewer-music-track" aria-label="Song progress">
-                <div class="viewer-music-playhead" id="viewer-music-playhead"></div>
-              </div>
-              <div class="viewer-music-nav" aria-label="Song navigation">
-                <button class="viewer-music-nav-btn" id="viewer-music-prev" type="button">Previous</button>
-                <button class="viewer-music-nav-btn" id="viewer-music-next" type="button">Next</button>
-              </div>
-              <div class="viewer-music-song-pill" id="viewer-music-song-pill" aria-label="Song selection"></div>
+              <input class="viewer-music-volume-slider" id="viewer-music-volume-slider" type="range" min="0" max="1"
+                step="0.01" value="1" aria-label="Cover volume">
             </div>
+            <div class="viewer-music-header">
+              <span class="viewer-music-kicker">BANDLAB COVER</span>
+              <h3 class="viewer-music-title">Don't say that<br>you love me -<br>Jin (cover)</h3>
+            </div>
+            <button class="viewer-music-play" id="viewer-music-play" type="button" aria-label="Play cover">
+              <svg viewBox="0 0 24 24" fill="currentColor">
+                <path class="play-pause-path"
+                  d="M 7 4 L 13.5 8 L 13.5 16 L 7 20 Z M 13.5 8 L 20 12 L 20 12 L 13.5 16 Z" />
+              </svg>
+            </button>
+            <div class="viewer-music-times">
+              <span id="viewer-music-current">0:00</span>
+              <span id="viewer-music-duration">3:00</span>
+            </div>
+            <div class="viewer-music-progress" id="viewer-music-track" aria-label="Song progress">
+              <div class="viewer-music-playhead" id="viewer-music-playhead"></div>
+            </div>
+            <div class="viewer-music-nav" aria-label="Song navigation">
+              <button class="viewer-music-nav-btn" id="viewer-music-prev" type="button">Previous</button>
+              <button class="viewer-music-nav-btn" id="viewer-music-next" type="button">Next</button>
+            </div>
+            <div class="viewer-music-song-pill" id="viewer-music-song-pill" aria-label="Song selection"></div>
           </div>
         </div>
-        
-        <!-- Hover Decorations Text (scrolls with section) -->
-        <div class="about-decorations" id="about-decorations">
-          <div class="decor-left">
-            <div class="decor-text decor-text-left" id="decor-text-left">My first sixth form<br>friend: Joshua.</div>
-          </div>
-          <div class="decor-right">
-            <div class="decor-text decor-text-right" id="decor-text-right">This is me<br>(with a mask on).</div>
-          </div>
+      </div>
+
+      <!-- Hover Decorations Text (scrolls with section) -->
+      <div class="about-decorations" id="about-decorations">
+        <div class="decor-left">
+          <div class="decor-text decor-text-left" id="decor-text-left">My first sixth form<br>friend: Joshua.</div>
         </div>
-
-        <div id="fixed-decorations" class="fixed-decorations">
-          <svg class="dynamic-arrows-canvas" id="dynamic-arrows-canvas" xmlns="http://www.w3.org/2000/svg">
-            <path id="dynamic-arrow-left" class="arrow-line" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="1"/>
-            <path id="dynamic-arrow-head-left" class="arrow-head" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
-            <path id="dynamic-arrow-right" class="arrow-line" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" pathLength="1"/>
-            <path id="dynamic-arrow-head-right" class="arrow-head" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round" pathLength="1"/>
-          </svg>
-          <img src="images/josh.png" alt="Joshua" class="fixed-img fixed-img-left" id="fixed-img-left">
-          <img src="images/dar.png" alt="Dar" class="fixed-img fixed-img-right" id="fixed-img-right">
+        <div class="decor-right">
+          <div class="decor-text decor-text-right" id="decor-text-right">This is me<br>(with a mask on).</div>
         </div>
+      </div>
 
-      </section>
+      <div id="fixed-decorations" class="fixed-decorations">
+        <svg class="dynamic-arrows-canvas" id="dynamic-arrows-canvas" xmlns="http://www.w3.org/2000/svg">
+          <path id="dynamic-arrow-left" class="arrow-line" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" pathLength="1" />
+          <path id="dynamic-arrow-head-left" class="arrow-head" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round" pathLength="1" />
+          <path id="dynamic-arrow-right" class="arrow-line" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" pathLength="1" />
+          <path id="dynamic-arrow-head-right" class="arrow-head" fill="none" stroke="currentColor" stroke-width="3"
+            stroke-linecap="round" stroke-linejoin="round" pathLength="1" />
+        </svg>
+        <img src="images/josh.png" alt="Joshua" class="fixed-img fixed-img-left" id="fixed-img-left">
+        <img src="images/dar.png" alt="Dar" class="fixed-img fixed-img-right" id="fixed-img-right">
+      </div>
 
-      <section class="section-panel">
-        <div class="skills-header">
-          <h2 id="skills">Skills</h2>
-          <ul class="skills-badges">
-            <li>Communicative</li>
-            <li>Collaborative</li>
-            <li>Python</li>
-            <li>Java</li>
-            <li>SQL</li>
-            <li>React</li>
-          </ul>
-        </div>
+    </section>
 
-        <hr>
+    <section class="section-panel" style="position: relative;" id="skills-education-section">
+      <!-- Floating Liquid Bubbles -->
+      <div class="liquid-bubbles-container" id="liquid-bubbles" aria-hidden="true">
+        <!-- SVG Filters for True Liquid Physics and Logo Extraction -->
+        <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg"
+          version="1.1">
+          <defs>
+            <filter id="goo" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="12" result="blur" />
+              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 22 -10"
+                result="goo" />
+              <feComposite in="SourceGraphic" in2="goo" operator="atop" />
+            </filter>
+            <filter id="extract-white-logo" color-interpolation-filters="sRGB">
+              <!-- Extract inverse luminance (White -> 0, Black -> 1) and output pure WHITE pixels -->
+              <feColorMatrix in="SourceGraphic" type="matrix" values="
+                0 0 0 0 1
+                0 0 0 0 1
+                0 0 0 0 1
+                -0.3333 -0.3333 -0.3333 0 1" result="invLuma" />
+              <!-- Maintain any existing transparent pixels -->
+              <feComposite in="invLuma" in2="SourceAlpha" operator="in" result="alphaMask" />
+              <!-- Sharpen the edges to remove anti-aliasing artifacts -->
+              <feComponentTransfer in="alphaMask" result="crispAlpha">
+                <feFuncA type="linear" slope="4" intercept="-0.5" />
+              </feComponentTransfer>
+            </filter>
+          </defs>
+        </svg>
 
-        <h2 id="education">Education</h2>
-        <div class="education-timeline">
-          <div class="timeline-glass-track"></div>
-          <div class="timeline-nodes">
-            <div class="timeline-node">
-              <div class="timeline-marker"></div>
-              <div class="timeline-content">
-                <h4>Stratford School Academy</h4>
-                <p class="education-dates">Sep 2015 - Apr 2020</p>
-                <ul class="education-list">
-                  <li>Chosen GCSEs: Design & Technology - 8, Computer Science - 8</li>
-                  <li>GCSE grades 9-7</li>
-                </ul>
-              </div>
-            </div>
+        <!-- The Physics Layer: This creates the liquid snapping and stretching -->
+        <div class="gooey-layer">
+          <div class="goo-anchor-left"></div>
+          <div class="goo-anchor-right"></div>
 
-            <div class="timeline-node">
-              <div class="timeline-marker"></div>
-              <div class="timeline-content">
-                <h4>St Angelas Ursuline Sixth Form</h4>
-                <p class="education-dates">Sep 2020 - Jun 2022</p>
-                <ul class="education-list">
-                  <li>Economics - A</li>
-                  <li>Computer Science - A</li>
-                  <li>Mathematics - B</li>
-                  <li style="white-space: nowrap;">Part of Sixth Form Choir (Year 13)</li>
-                </ul>
-              </div>
-            </div>
-            
-            <div class="timeline-node">
-              <div class="timeline-marker"></div>
-              <div class="timeline-content">
-                <h4>City St George's, University of London</h4>
-                <p class="education-dates">Sep 2022 - Jun 2025</p>
-                <p>Graduated with BSc (hons) in Computer Science</p>
-              </div>
-            </div>
-
-            <div class="timeline-node timeline-node-future">
-              <div class="timeline-marker job-hunt-marker">?</div>
-              <div class="job-hunt-container">
-                <span class="job-hunt-text">Job hunt!</span>
-                <svg class="job-hunt-arrow" viewBox="0 0 130 60" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-                  <path d="M0,25 C50,-10 115,15 115,55" />
-                  <polyline points="103,43 115,55 127,43" />
-                </svg>
-              </div>
-            </div>
+          <div class="liquid-bubble-wrapper lb-wrapper-left lb-w1">
+            <div class="gooey-blob"></div>
           </div>
-        </div>
-      </section>
-
-      <section class="section-panel">
-        <h2 id="projects">My Projects</h2>
-
-        <div class="project-card expandable-card" id="java-game-card" tabindex="0">
-          <div class="card-expand-top">
-            <a href="https://github.com/placeholder/java-game" target="_blank" rel="noopener noreferrer" class="github-link">
-              <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16"><path d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z"/></svg>
-              View on GitHub
-            </a>
+          <div class="liquid-bubble-wrapper lb-wrapper-left lb-w2">
+            <div class="gooey-blob"></div>
           </div>
-          <div class="card-content-main">
-            <h3>Advanced 2D Java Game</h3>
-            <ul>
-              <li>Took advantage of OOP programming through advanced class structures, re-using these for later, adding to the modularity of the code</li>
-              <li>Created enemy AI to track the player and follow them in the event of an ongoing battle</li>
-              <li>Made use of encapsulation to allow for multiple levels in-game, not interfering with each other.</li>
-              <li>Applied mathematics to calculate trajectories of bullets and hit-boxes for characters.</li>
-            </ul>
+          <div class="liquid-bubble-wrapper lb-wrapper-left lb-w3">
+            <div class="gooey-blob"></div>
           </div>
-          <div class="card-expand-bottom">
-            <div id="java-game-container" class="game-canvas-wrapper">
-              <div class="game-loading-text">Loading CheerpJ Runtime...</div>
-            </div>
+
+          <div class="liquid-bubble-wrapper lb-wrapper-right lb-w4">
+            <div class="gooey-blob"></div>
+          </div>
+          <div class="liquid-bubble-wrapper lb-wrapper-right lb-w5">
+            <div class="gooey-blob"></div>
           </div>
         </div>
 
-        <div class="project-card" tabindex="0">
-          <h3>Python/TKinter destination scheduler GUI</h3>
+        <!-- The Icon Layer: Follows the physics blobs exactly but doesn't get blurred by the filter -->
+        <div class="icon-layer">
+          <!-- Left Side Bubbles -->
+          <div class="liquid-bubble-wrapper lb-wrapper-left lb-w1">
+            <div class="liquid-bubble lb-1" data-label="Java">
+              <div class="skill-icon-colorizer" style="transform: scale(1.45);">
+                <img src="images/java.png" class="skill-icon-png" alt="Java" />
+              </div>
+            </div>
+          </div>
+          <div class="liquid-bubble-wrapper lb-wrapper-left lb-w2">
+            <div class="liquid-bubble lb-2" data-label="Python">
+              <div class="skill-icon-colorizer" style="transform: scale(1.2);">
+                <img src="images/python.png" class="skill-icon-png" alt="Python" />
+              </div>
+            </div>
+          </div>
+          <div class="liquid-bubble-wrapper lb-wrapper-left lb-w3">
+            <div class="liquid-bubble lb-3" data-label="React">
+              <svg viewBox="-11.5 -10.23174 23 20.46348" width="24" height="24" fill="currentColor">
+                <circle cx="0" cy="0" r="2.05" fill="currentColor" />
+                <g stroke="currentColor" stroke-width="1" fill="none">
+                  <ellipse rx="11" ry="4.2" />
+                  <ellipse rx="11" ry="4.2" transform="rotate(60)" />
+                  <ellipse rx="11" ry="4.2" transform="rotate(120)" />
+                </g>
+              </svg>
+            </div>
+          </div>
+
+          <!-- Right Side Bubbles -->
+          <div class="liquid-bubble-wrapper lb-wrapper-right lb-w4">
+            <div class="liquid-bubble lb-4" data-label="Selenium">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="currentColor">
+                <text x="12" y="17" font-size="16" font-weight="bold" text-anchor="middle"
+                  font-family="sans-serif">Se</text>
+              </svg>
+            </div>
+          </div>
+          <div class="liquid-bubble-wrapper lb-wrapper-right lb-w5">
+            <div class="liquid-bubble lb-5" data-label="SQL">
+              <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"
+                stroke-linecap="round" stroke-linejoin="round">
+                <ellipse cx="12" cy="5" rx="9" ry="3"></ellipse>
+                <path d="M21 12c0 1.66-4 3-9 3s-9-1.34-9-3"></path>
+                <path d="M3 5v14c0 1.66 4 3 9 3s9-1.34 9-3V5"></path>
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <div class="skills-header">
+        <h2 id="skills">Skills</h2>
+        <ul class="skills-badges">
+          <li>Communicative</li>
+          <li>Collaborative</li>
+          <li>Python</li>
+          <li>Java</li>
+          <li>SQL</li>
+          <li>React</li>
+        </ul>
+      </div>
+
+      <hr>
+
+      <h2 id="education">Education</h2>
+      <div class="education-timeline">
+        <div class="timeline-glass-track"></div>
+        <div class="timeline-nodes">
+          <div class="timeline-node">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <h4>Stratford School Academy</h4>
+              <p class="education-dates">Sep 2015 - Apr 2020</p>
+              <ul class="education-list">
+                <li>Chosen GCSEs: Design & Technology - 8, Computer Science - 8</li>
+                <li>GCSE grades 9-7</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="timeline-node">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <h4>St Angelas Ursuline Sixth Form</h4>
+              <p class="education-dates">Sep 2020 - Jun 2022</p>
+              <ul class="education-list">
+                <li>Economics - A</li>
+                <li>Computer Science - A</li>
+                <li>Mathematics - B</li>
+                <li style="white-space: nowrap;">Part of Sixth Form Choir (Year 13)</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="timeline-node">
+            <div class="timeline-marker"></div>
+            <div class="timeline-content">
+              <h4>City St George's, University of London</h4>
+              <p class="education-dates">Sep 2022 - Jun 2025</p>
+              <p>Graduated with BSc (hons) in Computer Science</p>
+            </div>
+          </div>
+
+          <div class="timeline-node timeline-node-future">
+            <div class="timeline-marker job-hunt-marker">?</div>
+            <div class="job-hunt-container">
+              <span class="job-hunt-text">Job hunt!</span>
+              <svg class="job-hunt-arrow" viewBox="0 0 130 60" fill="none" stroke="currentColor" stroke-width="2.5"
+                stroke-linecap="round" stroke-linejoin="round">
+                <path d="M0,25 C50,-10 115,15 115,55" />
+                <polyline points="103,43 115,55 127,43" />
+              </svg>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <h2 id="projects">My Projects</h2>
+
+      <div class="project-card expandable-card" id="java-game-card" tabindex="0">
+        <div class="card-expand-top">
+          <a href="https://github.com/placeholder/java-game" target="_blank" rel="noopener noreferrer"
+            class="github-link">
+            <svg viewBox="0 0 24 24" fill="currentColor" width="16" height="16">
+              <path
+                d="M12 0c-6.626 0-12 5.373-12 12 0 5.302 3.438 9.8 8.207 11.387.599.111.793-.261.793-.577v-2.234c-3.338.726-4.033-1.416-4.033-1.416-.546-1.387-1.333-1.756-1.333-1.756-1.089-.745.083-.729.083-.729 1.205.084 1.839 1.237 1.839 1.237 1.07 1.834 2.807 1.304 3.492.997.107-.775.418-1.305.762-1.604-2.665-.305-5.467-1.334-5.467-5.931 0-1.311.469-2.381 1.236-3.221-.124-.303-.535-1.524.117-3.176 0 0 1.008-.322 3.301 1.23.957-.266 1.983-.399 3.003-.404 1.02.005 2.047.138 3.006.404 2.291-1.552 3.297-1.23 3.297-1.23.653 1.653.242 2.874.118 3.176.77.84 1.235 1.911 1.235 3.221 0 4.609-2.807 5.624-5.479 5.921.43.372.823 1.102.823 2.222v3.293c0 .319.192.694.801.576 4.765-1.589 8.199-6.086 8.199-11.386 0-6.627-5.373-12-12-12z" />
+            </svg>
+            View on GitHub
+          </a>
+          <div class="project-sprite-stage" aria-hidden="true">
+            <div class="project-sprite-runner">
+              <img class="project-sprite" src="assets/labgame/char1.png" alt="">
+            </div>
+          </div>
+        </div>
+        <div class="card-content-main">
+          <h3>Advanced 2D Java Game</h3>
           <ul>
-            <li>Implemented a selenium driver to scrape information from relevant webpages and display accurate information for weather, maps and directions.</li>
-            <li>Experimented with a library created for building GUIs in python, allowing me to place, create and link buttons/entries to their relevant actions and types</li>
+            <li>Took advantage of OOP programming through advanced class structures, adding to the modularity of the
+              code</li>
+            <li>Created enemy AI to track the player and follow them in the event of an ongoing battle</li>
+            <li>Made use of encapsulation to allow for multiple levels in-game, not interfering with each other.</li>
+            <li>Applied mathematics to calculate trajectories of bullets and hit-boxes for characters.</li>
           </ul>
         </div>
-
-        <div class="project-card" tabindex="0">
-          <h3>Final Year Project (advanced Android application for learning to drive)</h3>
-          <ul>
-            <li>Created a platform for driving instructors and learners to easily interact with each other.</li>
-            <li>Utilised Kotlin along with Jetpack Compose components to build a complete Android package with a Firebase database, Stripe integration, notifications, messaging, dynamic calendar updates, and much more.</li>
-            <li>Already in-use with my own driving instructor and numerous students.</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="section-panel">
-        <h2 id="experience">Past Experience</h2>
-
-        <div class="section-block">
-          <h3>Stratford community food hub, E15 1BG</h3>
-          <p><strong>Food Hub Assistant</strong></p>
-          <p>Apr 2021 - Jul 2021</p>
-          <ul>
-            <li>Packaged bags full of groceries, containing fruits, bread etc, handed out to people in need</li>
-            <li>Utilized teamwork skills to accelerate the process of getting food ready to be sent out through working together on a single bag of produce or handling multiple pallets of bags</li>
-            <li>Showcased communication by talking through, placing crates of bags belonging to the correct side</li>
-            <li>Recorded codes of specific consumers to be handed their unique bag of food</li>
-            <li>Organisational skills applied when required to re-stock produce from newly arrived crates using a pallet lifter</li>
-            <li>Actively kept the building tidy, taking out large bin bags daily</li>
-          </ul>
-        </div>
-
-        <hr>
-
-        <div class="section-block">
-          <h3>Peacocks, East Ham</h3>
-          <p><strong>Floor Staff</strong></p>
-          <ul>
-            <li>Moved around clothing payload using cargo elevators</li>
-            <li>Assisted shoppers with directions on clothing along with other utilities</li>
-            <li>Kept the store tidy through picking up fallen clothes and gave tags to items</li>
-          </ul>
-        </div>
-
-        <hr>
-
-        <div class="section-block">
-          <h3>Young Professionals, Online</h3>
-          <p>Aug 2019 - Aug 2019</p>
-          <ul>
-            <li>Gained insight across multiple firms such as IBM, EY, Capgemini</li>
-            <li>Listened to speakers from numerous companies on the pathways they took, e.g. apprenticeship</li>
-            <li>Made connections to these firms through linkedin</li>
-          </ul>
-        </div>
-      </section>
-
-      <section class="section-panel">
-        <div class="section-heading">
-          <h2 id="contact">Contact Me</h2>
-        </div>
-
-        <form>
-          <div class="form-grid">
-            <label for="name" class="sr-only">Name</label>
-            <input type="text" id="name" name="name" placeholder="Name">
-
-            <label for="email" class="sr-only">Email</label>
-            <input type="text" id="email" name="email" placeholder="Email address">
-
-            <label for="query" class="sr-only">Query</label>
-            <textarea id="query" name="query" class="query-input" placeholder="Your question or message"></textarea>
-
-            <button type="submit">Submit</button>
+        <div class="card-expand-bottom">
+          <div class="media-placeholders">
+            <div class="media-placeholder video-placeholder">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path d="M8 5v14l11-7z" />
+              </svg>
+              <span>Demo Video (Placeholder)</span>
+            </div>
+            <div class="media-placeholder img-placeholder">
+              <svg viewBox="0 0 24 24" width="24" height="24" fill="currentColor">
+                <path
+                  d="M21 19V5c0-1.1-.9-2-2-2H5c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h14c1.1 0 2-.9 2-2zM8.5 13.5l2.5 3.01L14.5 12l4.5 6H5l3.5-4.5z" />
+              </svg>
+              <span>Screenshot (Placeholder)</span>
+            </div>
           </div>
-        </form>
-      </section>
+        </div>
+      </div>
 
-    </main>
+      <div class="project-card" tabindex="0">
+        <h3>Python/TKinter destination scheduler GUI</h3>
+        <ul>
+          <li>Implemented a selenium driver to scrape information from relevant webpages and display accurate
+            information for weather, maps and directions.</li>
+          <li>Experimented with a library created for building GUIs in python, allowing me to place, create and link
+            buttons/entries to their relevant actions and types</li>
+        </ul>
+      </div>
 
-<footer class="site-footer">
+      <div class="project-card" tabindex="0">
+        <h3>Final Year Project (advanced Android application for learning to drive)</h3>
+        <ul>
+          <li>Created a platform for driving instructors and learners to easily interact with each other.</li>
+          <li>Utilised Kotlin along with Jetpack Compose components to build a complete Android package with a Firebase
+            database, Stripe integration, notifications, messaging, dynamic calendar updates, and much more.</li>
+          <li>Already in-use with my own driving instructor and numerous students.</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <h2 id="experience">Past Experience</h2>
+
+      <div class="section-block">
+        <h3>Stratford community food hub, E15 1BG</h3>
+        <p><strong>Food Hub Assistant</strong></p>
+        <p>Apr 2021 - Jul 2021</p>
+        <ul>
+          <li>Packaged bags full of groceries, containing fruits, bread etc, handed out to people in need</li>
+          <li>Utilized teamwork skills to accelerate the process of getting food ready to be sent out through working
+            together on a single bag of produce or handling multiple pallets of bags</li>
+          <li>Showcased communication by talking through, placing crates of bags belonging to the correct side</li>
+          <li>Recorded codes of specific consumers to be handed their unique bag of food</li>
+          <li>Organisational skills applied when required to re-stock produce from newly arrived crates using a pallet
+            lifter</li>
+          <li>Actively kept the building tidy, taking out large bin bags daily</li>
+        </ul>
+      </div>
+
+      <hr>
+
+      <div class="section-block">
+        <h3>Peacocks, East Ham</h3>
+        <p><strong>Floor Staff</strong></p>
+        <ul>
+          <li>Moved around clothing payload using cargo elevators</li>
+          <li>Assisted shoppers with directions on clothing along with other utilities</li>
+          <li>Kept the store tidy through picking up fallen clothes and gave tags to items</li>
+        </ul>
+      </div>
+
+      <hr>
+
+      <div class="section-block">
+        <h3>Young Professionals, Online</h3>
+        <p>Aug 2019 - Aug 2019</p>
+        <ul>
+          <li>Gained insight across multiple firms such as IBM, EY, Capgemini</li>
+          <li>Listened to speakers from numerous companies on the pathways they took, e.g. apprenticeship</li>
+          <li>Made connections to these firms through linkedin</li>
+        </ul>
+      </div>
+    </section>
+
+    <section class="section-panel">
+      <div class="section-heading">
+        <h2 id="contact">Contact Me</h2>
+      </div>
+
+      <form>
+        <div class="form-grid">
+          <label for="name" class="sr-only">Name</label>
+          <input type="text" id="name" name="name" placeholder="Name">
+
+          <label for="email" class="sr-only">Email</label>
+          <input type="text" id="email" name="email" placeholder="Email address">
+
+          <label for="query" class="sr-only">Query</label>
+          <textarea id="query" name="query" class="query-input" placeholder="Your question or message"></textarea>
+
+          <button type="submit">Submit</button>
+        </div>
+      </form>
+    </section>
+
+  </main>
+
+  <footer class="site-footer">
     <p>Made by Darsheet, 2026</p>
-</footer>
+  </footer>
 
 
 
-<div class="custom-scrollbar-container">
-  <div class="custom-scrollbar-thumb"></div>
-</div>
+  <div class="custom-scrollbar-container">
+    <div class="custom-scrollbar-thumb"></div>
+  </div>
 
 </body>
+
 </html>
