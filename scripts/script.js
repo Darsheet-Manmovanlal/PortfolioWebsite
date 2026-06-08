@@ -24,7 +24,8 @@ document.addEventListener('DOMContentLoaded', function () {
       const target = document.getElementById(targetId) || document.querySelector(`[id="${targetId}"]`);
       if (target) {
         e.preventDefault();
-        const y = target.getBoundingClientRect().top + window.pageYOffset - OFFSET;
+        // Add 30px extra offset so it doesn't scroll down as much
+        const y = target.getBoundingClientRect().top + window.pageYOffset - OFFSET - 30;
         window.scrollTo({ top: y, behavior: 'smooth' });
         history.replaceState(null, '', '#' + targetId);
       }
@@ -144,35 +145,42 @@ const skillsSection = document.getElementById('skills');
 
 if (aboutSection && heroSection && topBar) {
   const skillsPanel = skillsSection ? skillsSection.closest('.section-panel') : null;
-  const skillsListItems = skillsPanel ? skillsPanel.querySelectorAll('li') : [];
-  const lastSkill = skillsListItems.length > 0 ? skillsListItems[skillsListItems.length - 1] : null;
+  const aboutExpanded = aboutSection.querySelector('.about-expanded');
 
   let arrowsInitialized = false;
+  let skillsInViewport = false;
 
   let cachedTopBarHeight = topBar.offsetHeight;
-  window.addEventListener('resize', () => { cachedTopBarHeight = topBar.offsetHeight; }, { passive: true });
+  let cachedHeroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+
+  window.addEventListener('resize', () => {
+    cachedTopBarHeight = topBar.offsetHeight;
+    cachedHeroBottom = heroSection.offsetTop + heroSection.offsetHeight;
+  }, { passive: true });
+
+  if (skillsPanel) {
+    const observer = new IntersectionObserver((entries) => {
+      entries.forEach(entry => {
+        skillsInViewport = entry.isIntersecting;
+        handleScrollAnimations();
+      });
+    }, {
+      rootMargin: '0px 0px -15% 0px'
+    });
+    observer.observe(skillsPanel);
+  }
 
   const handleScrollAnimations = () => {
     if (!aboutSection || !heroSection || !topBar) return;
 
     const topBarBottom = window.scrollY + cachedTopBarHeight;
-    const heroBottom = heroSection.offsetTop + heroSection.offsetHeight;
-
-    const pastHero = topBarBottom >= heroBottom;
-
-    // Scroll down past last skill
-    let pastSkills = false;
-    if (lastSkill) {
-      const lastSkillRect = lastSkill.getBoundingClientRect();
-      if (lastSkillRect.bottom < window.innerHeight - 50) {
-        pastSkills = true;
-      }
-    }
+    const pastHero = topBarBottom >= cachedHeroBottom;
 
     // About section blob expansion (expands once and stays expanded)
     if (pastHero) {
       if (!aboutSection.classList.contains('is-expanded')) {
         aboutSection.classList.add('is-expanded');
+        aboutSection.dataset.expandTime = performance.now();
 
         // Spin models using their current HTML camera-orbit values dynamically
         const sdModel = document.getElementById('sd-model');
@@ -193,7 +201,8 @@ if (aboutSection && heroSection && topBar) {
           const kbOrbit = getOrbitParams(kbModel, '0deg 75deg 105%');
           const guitarOrbit = guitarModel ? getOrbitParams(guitarModel, '180deg 75deg 105%') : null;
 
-          setTimeout(() => {
+          const spinModel = (model, orbit) => {
+            if (!model || !orbit) return;
             const duration = 1500;
             const startTime = performance.now();
             function animateSpin(currentTime) {
@@ -201,38 +210,44 @@ if (aboutSection && heroSection && topBar) {
               const progress = Math.min(elapsed / duration, 1);
               const easeProgress = 1 - Math.pow(1 - progress, 3);
               const spinProgress = -360 + (360 * easeProgress);
-              
-              sdModel.cameraOrbit = `${spinProgress + sdOrbit.theta}deg ${sdOrbit.phi} ${sdOrbit.radius}`;
-              kbModel.cameraOrbit = `${spinProgress + kbOrbit.theta}deg ${kbOrbit.phi} ${kbOrbit.radius}`;
-              if (guitarModel && guitarOrbit) {
-                guitarModel.cameraOrbit = `${spinProgress + guitarOrbit.theta}deg ${guitarOrbit.phi} ${guitarOrbit.radius}`;
-              }
-              
+              model.cameraOrbit = `${spinProgress + orbit.theta}deg ${orbit.phi} ${orbit.radius}`;
               if (progress < 1) {
                 requestAnimationFrame(animateSpin);
               } else {
-                sdModel.cameraOrbit = sdOrbit.raw;
-                kbModel.cameraOrbit = kbOrbit.raw;
-                if (guitarModel && guitarOrbit) {
-                  guitarModel.cameraOrbit = guitarOrbit.raw;
-                }
+                model.cameraOrbit = orbit.raw;
               }
             }
             requestAnimationFrame(animateSpin);
-          }, 300);
+          };
+
+          const triggerModelSpin = (model, orbit) => {
+            if (!model || !orbit) return;
+            const runSpin = () => {
+              setTimeout(() => {
+                spinModel(model, orbit);
+              }, 300);
+            };
+            if (model.loaded) {
+              runSpin();
+            } else {
+              model.addEventListener('load', runSpin, { once: true });
+            }
+          };
+
+          triggerModelSpin(sdModel, sdOrbit);
+          triggerModelSpin(kbModel, kbOrbit);
+          if (guitarModel && guitarOrbit) {
+            triggerModelSpin(guitarModel, guitarOrbit);
+          }
         }
 
-        // Re-evaluate scroll logic during the CSS transition (1200ms)
-        // Throttled to every 4th frame to avoid layout thrashing
-        const startTime = performance.now();
-        let frameCount = 0;
-        const tick = (now) => {
-          if (++frameCount % 4 === 0) handleScrollAnimations();
-          if (now - startTime < 1300) {
-            requestAnimationFrame(tick);
+        // Re-evaluate scroll logic once the CSS transition (1300ms) has finished
+        setTimeout(() => {
+          if (aboutExpanded) {
+            console.log("UNCONSTRAINED_ABOUT_EXPANDED_SCROLL_HEIGHT:", aboutExpanded.scrollHeight, "WINDOW_WIDTH:", window.innerWidth);
           }
-        };
-        requestAnimationFrame(tick);
+          handleScrollAnimations();
+        }, 1300);
       }
 
       // Ensure arrows are started only once when in view
@@ -242,9 +257,9 @@ if (aboutSection && heroSection && topBar) {
       }
     }
 
-    const skillsSectionTop = skillsPanel ? skillsPanel.getBoundingClientRect().top : window.innerHeight;
-    // Require scrolling past the top section and for the skills section to reach the lower third of the viewport to trigger early
-    const isSkillsInView = pastHero && skillsSectionTop < window.innerHeight * 0.85;
+    const expandTime = parseFloat(aboutSection.dataset.expandTime || 0);
+    const isExpanding = expandTime > 0 && (performance.now() - expandTime < 1300);
+    const isSkillsInView = pastHero && skillsInViewport && !isExpanding;
 
     // Decorations visibility (hides when skills section comes into view)
     if (!isSkillsInView) {
@@ -1617,7 +1632,7 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
 /* ---------- Search Bar Functionality ---------- */
 const searchBarInput = document.querySelector('.search-bar');
 if (searchBarInput) {
-  const searchableElements = document.querySelectorAll('.section-block, .content-list li, .about-section p');
+  const searchableElements = document.querySelectorAll('.section-block, .about-section p, .skills-badges li, .timeline-content h4, .timeline-content p, .education-list li, .project-card h3, .project-card li, .job-hunt-text');
   
   // Store original HTML to restore when query changes
   const originalHTMLs = new Map();
