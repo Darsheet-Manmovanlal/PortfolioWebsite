@@ -149,6 +149,10 @@ if (aboutSection && heroSection && topBar) {
 
   let arrowsInitialized = false;
   let skillsInViewport = false;
+  if (skillsPanel) {
+    const rect = skillsPanel.getBoundingClientRect();
+    skillsInViewport = rect.top < window.innerHeight * 0.85;
+  }
 
   let cachedTopBarHeight = topBar.offsetHeight;
   let cachedHeroBottom = heroSection.offsetTop + heroSection.offsetHeight;
@@ -161,7 +165,7 @@ if (aboutSection && heroSection && topBar) {
   if (skillsPanel) {
     const observer = new IntersectionObserver((entries) => {
       entries.forEach(entry => {
-        skillsInViewport = entry.isIntersecting;
+        skillsInViewport = entry.isIntersecting || entry.boundingClientRect.top < 0;
         handleScrollAnimations();
       });
     }, {
@@ -259,27 +263,26 @@ if (aboutSection && heroSection && topBar) {
 
     const expandTime = parseFloat(aboutSection.dataset.expandTime || 0);
     const isExpanding = expandTime > 0 && (performance.now() - expandTime < 1300);
-    const isSkillsInView = pastHero && skillsInViewport && !isExpanding;
+    const hideDecorations = pastHero && skillsInViewport;
+    const showBubbles = pastHero && skillsInViewport && !isExpanding;
 
-    // Decorations visibility (hides when skills section comes into view)
-    if (!isSkillsInView) {
-      if (fixedDecorations) {
-        fixedDecorations.classList.remove('fade-out');
-      }
-      if (aboutDecorations) {
-        aboutDecorations.classList.remove('fade-out');
-      }
-      const bubbles = document.getElementById('liquid-bubbles');
-      if (bubbles) bubbles.classList.remove('show-bubbles');
+    // Decorations visibility (hides immediately when skills section comes into view)
+    if (hideDecorations) {
+      if (fixedDecorations) fixedDecorations.classList.add('fade-out');
+      if (aboutDecorations) aboutDecorations.classList.add('fade-out');
     } else {
-      if (fixedDecorations) {
-        fixedDecorations.classList.add('fade-out');
+      if (fixedDecorations) fixedDecorations.classList.remove('fade-out');
+      if (aboutDecorations) aboutDecorations.classList.remove('fade-out');
+    }
+
+    // Bubbles visibility (waits for about section to finish expanding)
+    const bubbles = document.getElementById('liquid-bubbles');
+    if (bubbles) {
+      if (showBubbles) {
+        bubbles.classList.add('show-bubbles');
+      } else {
+        bubbles.classList.remove('show-bubbles');
       }
-      if (aboutDecorations) {
-        aboutDecorations.classList.add('fade-out');
-      }
-      const bubbles = document.getElementById('liquid-bubbles');
-      if (bubbles) bubbles.classList.add('show-bubbles');
     }
   };
 
@@ -2415,3 +2418,373 @@ if (blobPrevBtn && blobNextBtn) {
   });
 }
 
+/* ---------- Past Experience Bubbles Interaction ---------- */
+const expBubbles = document.querySelectorAll('.exp-liquid-bubble');
+const expExpandedView = document.getElementById('exp-expanded-view');
+const expBackBtn = document.getElementById('exp-back-btn');
+const expInteractiveContainer = document.getElementById('exp-interactive-container');
+const expContentBoxes = document.querySelectorAll('.exp-content-box');
+let activeOriginalBlob = null; // Store reference to the clicked blob for shape syncing
+
+// A tight, responsive multi-bounce spring!
+// Reaches target at 400ms, peaks at 12% overshoot at 640ms, and settles smoothly.
+const springEasing = 'linear(0.000 0%, 0.253 4%, 0.504 8%, 0.721 12%, 0.890 16%, 1.009 20%, 1.081 24%, 1.116 28%, 1.123 32%, 1.111 36%, 1.091 40%, 1.066 44%, 1.043 48%, 1.023 52%, 1.008 56%, 0.998 60%, 0.991 64%, 0.989 68%, 0.988 72%, 0.990 76%, 0.992 80%, 0.994 84%, 0.996 88%, 0.998 92%, 0.999 96%, 1.000 100%, 1 100%)';
+
+if (expBubbles.length > 0 && expExpandedView && expBackBtn && expInteractiveContainer) {
+
+  // Maintain a running z-index to ensure the last hovered bubble stays permanently on top
+  let currentTopZ = 10;
+
+  // Apply spring wobble to individual bubbles on hover
+  expBubbles.forEach(bubble => {
+    const iconWrapper = bubble.closest('.exp-bubble-wrapper');
+    if (iconWrapper) {
+      // Find the corresponding gooey wrapper to sync physics layer
+      let gooeyWrapper = null;
+      if (iconWrapper.classList.contains('exp-center-wrapper')) {
+        gooeyWrapper = document.querySelector('.exp-gooey-layer .exp-center-wrapper');
+      } else {
+        const orbitClass = Array.from(iconWrapper.classList).find(c => c.startsWith('orbit-'));
+        if (orbitClass) gooeyWrapper = document.querySelector(`.exp-gooey-layer .${orbitClass}`);
+      }
+      
+      const state = { current: 1, velocity: 0, target: 1, raf: null };
+      
+      bubble.addEventListener('mouseenter', () => {
+        // Bump z-index permanently to make it the top-most
+        currentTopZ++;
+        iconWrapper.style.zIndex = currentTopZ;
+
+        state.target = 0;
+        animatePlayback();
+      });
+      
+      bubble.addEventListener('mouseleave', () => {
+        state.target = 1;
+        animatePlayback();
+      });
+      
+      function animatePlayback() {
+        if (state.raf) cancelAnimationFrame(state.raf);
+        
+        const getAnim = (wrapper) => {
+          if (!wrapper) return null;
+          const anims = wrapper.getAnimations();
+          return anims.find(a => a.animationName && a.animationName.startsWith('orbit'));
+        };
+        
+        const iconAnim = getAnim(iconWrapper);
+        const gooeyAnim = getAnim(gooeyWrapper);
+        
+        const tension = 0.12;
+        const friction = 0.82;
+        
+        const tick = () => {
+          const force = (state.target - state.current) * tension;
+          state.velocity = (state.velocity + force) * friction;
+          state.current += state.velocity;
+          
+          if (iconAnim) iconAnim.playbackRate = state.current;
+          if (gooeyAnim) gooeyAnim.playbackRate = state.current;
+          
+          if (Math.abs(state.target - state.current) > 0.001 || Math.abs(state.velocity) > 0.001) {
+            state.raf = requestAnimationFrame(tick);
+          } else {
+            if (iconAnim) iconAnim.playbackRate = state.target;
+            if (gooeyAnim) gooeyAnim.playbackRate = state.target;
+            state.current = state.target;
+            state.velocity = 0;
+          }
+        };
+        state.raf = requestAnimationFrame(tick);
+      }
+    }
+  });
+
+  expBubbles.forEach(bubble => {
+    bubble.addEventListener('click', (e) => {
+      const targetId = bubble.getAttribute('data-target');
+      if (!targetId) return;
+
+      // FLIP-like animation: Create a giant blob starting from the clicked bubble
+      const rect = bubble.getBoundingClientRect();
+      const containerRect = expInteractiveContainer.getBoundingClientRect();
+      const gooeyLayer = document.querySelector('.exp-gooey-layer');
+      const gooeyRect = gooeyLayer.getBoundingClientRect();
+      
+      let giantBlob = document.getElementById('exp-giant-blob');
+      if (!giantBlob) {
+        giantBlob = document.createElement('div');
+        giantBlob.id = 'exp-giant-blob';
+        giantBlob.className = 'exp-giant-blob';
+        document.querySelector('.exp-gooey-layer').appendChild(giantBlob);
+      }
+      
+      const blobCenterX = rect.left + rect.width / 2 - gooeyRect.left;
+      const blobCenterY = rect.top + rect.height / 2 - gooeyRect.top;
+
+      const containerCenterX = rect.left + rect.width / 2 - containerRect.left;
+      const containerCenterY = rect.top + rect.height / 2 - containerRect.top;
+      
+      giantBlob.style.transition = 'none';
+      giantBlob.style.left = `${blobCenterX}px`;
+      giantBlob.style.top = `${blobCenterY}px`;
+      giantBlob.style.width = `${rect.width}px`;
+      giantBlob.style.height = `${rect.height}px`;
+      giantBlob.style.transform = 'translate(-50%, -50%) scale(1)';
+      giantBlob.style.opacity = '1';
+      
+      // Store initial coordinates and active blob reference for the reverse animation
+      activeOriginalBlob = bubble.querySelector('.exp-gooey-blob') || bubble.querySelector('.exp-liquid-bubble') || bubble;
+      giantBlob.dataset.startX = blobCenterX;
+      giantBlob.dataset.startY = blobCenterY;
+
+      // Freeze ALL orbit wrappers in place so they stop moving while expanded
+      document.querySelectorAll('.exp-orbit-wrapper').forEach(orbit => {
+        orbit.style.animationPlayState = 'paused';
+      });
+
+      // Find the targeted content box to measure its height dynamically
+      const targetBox = document.getElementById(targetId);
+      let contentWidth = 500;
+      let contentHeight = 350;
+      
+      if (targetBox) {
+        const innerBlock = targetBox.querySelector('.section-block');
+        
+        // Temporarily prepare it for measurement
+        targetBox.style.display = 'flex';
+        targetBox.style.position = 'absolute';
+        targetBox.style.visibility = 'hidden';
+        targetBox.style.width = 'fit-content';
+        targetBox.style.height = 'auto';
+        targetBox.style.paddingTop = '60px'; // Push text down away from the back button
+        targetBox.style.maxWidth = `${Math.min(560, containerRect.width * 0.8)}px`; 
+        
+        if (innerBlock) innerBlock.style.display = 'inline-block'; // shrink-wrap text
+        
+        contentWidth = targetBox.offsetWidth;
+        contentHeight = targetBox.offsetHeight;
+        
+        // Reset properties
+        targetBox.style.display = '';
+        targetBox.style.position = '';
+        targetBox.style.visibility = '';
+        targetBox.style.width = '';
+        targetBox.style.height = '';
+        targetBox.style.paddingTop = '';
+        targetBox.style.maxWidth = '';
+        if (innerBlock) innerBlock.style.display = '';
+      }
+      
+      // Calculate the raw diagonal of the tightly wrapped content
+      const diagonal = Math.sqrt(contentWidth * contentWidth + contentHeight * contentHeight);
+      
+      // Calculate targetSize using just the diagonal plus a minimal buffer
+      let targetSize = Math.ceil(diagonal + 80); 
+      targetSize = Math.max(500, Math.min(targetSize, containerRect.width * 0.95));
+      
+      // Expand container background if needed
+      let newContainerHeight = 560;
+      if (targetSize > 560) {
+        newContainerHeight = targetSize + 40;
+        expInteractiveContainer.style.minHeight = `${newContainerHeight}px`;
+      } else {
+        expInteractiveContainer.style.minHeight = '560px';
+      }
+      
+      const newCenterY = newContainerHeight / 2;
+      
+      const scaleFactor = targetSize / rect.width;
+      
+      giantBlob.style.transition = `all 2000ms ${springEasing}`;
+      giantBlob.style.left = '50%';
+      giantBlob.style.top = '50%';
+      giantBlob.style.transform = `translate(-50%, -50%) scale(${scaleFactor})`;
+
+      // Update exp-expanded-view size dynamically
+      expExpandedView.style.width = `${targetSize}px`;
+      expExpandedView.style.height = `${targetSize}px`;
+
+      // Animate the back button to dynamically ride the top-left corner of the blob
+      const backBtn = document.getElementById('exp-back-btn');
+      
+      // Calculate top-left anchored offset for the initial clicked bubble
+      const startOffset = rect.width * 0.16;
+      const startX = containerCenterX - rect.width / 2 + startOffset;
+      const startY = containerCenterY - rect.height / 2 + startOffset;
+      
+      // Calculate top-left anchored offset for the final giant blob using the NEW center
+      const endOffset = targetSize * 0.16;
+      const endX = (containerRect.width / 2) - (targetSize / 2) + endOffset;
+      const endY = newCenterY - (targetSize / 2) + endOffset;
+      
+      // Set initial position and clear any inline hide properties
+      backBtn.style.transition = 'none';
+      backBtn.style.opacity = '';
+      backBtn.style.visibility = '';
+      backBtn.style.left = `${startX}px`;
+      backBtn.style.top = `${startY}px`;
+      
+      // Store start position for the reverse animation
+      backBtn.dataset.startX = startX;
+      backBtn.dataset.startY = startY;
+      
+      void backBtn.offsetWidth; // reflow
+      
+      // Transition along with the blob
+      backBtn.style.transition = `all 2000ms ${springEasing}, background 200ms ease, transform 200ms ease`;
+      backBtn.style.left = `${endX}px`;
+      backBtn.style.top = `${endY}px`;
+
+      // Hide all content boxes
+      expContentBoxes.forEach(box => {
+        box.classList.remove('is-active');
+      });
+
+      // Show the targeted content box
+      if (targetBox) {
+        targetBox.style.maxWidth = `${Math.min(560, containerRect.width * 0.8)}px`; // Apply max-width
+        targetBox.classList.add('is-active');
+      }
+
+      // Calculate wipe origin dynamically based on clicked bubble's coordinates relative to the expanded view
+      const viewWidth = expExpandedView.offsetWidth || targetSize;
+      const viewHeight = expExpandedView.offsetHeight || targetSize;
+      const viewLeft = containerRect.width / 2 - viewWidth / 2;
+      const viewTop = newCenterY - viewHeight / 2;
+      
+      const wipeX = ((containerCenterX - viewLeft) / viewWidth) * 100;
+      const wipeY = ((containerCenterY - viewTop) / viewHeight) * 100;
+      
+      expExpandedView.style.setProperty('--wipe-x', `${wipeX}%`);
+      expExpandedView.style.setProperty('--wipe-y', `${wipeY}%`);
+
+      // Morph the container
+      expInteractiveContainer.classList.add('is-morphed');
+      expExpandedView.classList.add('is-active');
+
+      // Auto-scroll to perfectly center the final expanded blob inside the visual screen space
+      const topBar = document.querySelector('.top-bar');
+      const OFFSET = topBar ? topBar.offsetHeight : 80;
+      
+      const absoluteTop = containerRect.top + window.scrollY;
+      const visualScreenHeight = window.innerHeight - OFFSET;
+      
+      const targetScrollTop = absoluteTop + (newContainerHeight / 2) - OFFSET - (visualScreenHeight / 2);
+      setTimeout(() => {
+        window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+      }, 60);
+    });
+    
+    // Keyboard support
+    bubble.addEventListener('keydown', (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        bubble.click();
+      }
+    });
+  });
+
+  expBackBtn.addEventListener('click', () => {
+    // Scroll back to the "Past Experience" heading using a delayed standard smooth scroll
+    setTimeout(() => {
+      const experienceHeading = document.getElementById('experience');
+      if (experienceHeading) {
+        const topBar = document.querySelector('.top-bar');
+        const OFFSET = topBar ? topBar.offsetHeight : 80;
+        const targetScrollTop = experienceHeading.getBoundingClientRect().top + window.pageYOffset - OFFSET - 30;
+        window.scrollTo({ top: targetScrollTop, behavior: 'smooth' });
+      }
+    }, 800);
+
+    expInteractiveContainer.classList.add('is-handoff');
+
+    // Delay removing is-morphed until the giant blob finishes its bounce, so the background text doesn't fade in early
+    setTimeout(() => {
+      expInteractiveContainer.classList.remove('is-morphed');
+      expInteractiveContainer.style.minHeight = '560px';
+    }, 1000);
+    expExpandedView.classList.remove('is-active');
+    
+    // Reverse the giant blob animation
+    const giantBlob = document.getElementById('exp-giant-blob');
+    if (giantBlob) {
+      const currentTransform = giantBlob.style.transform;
+      const startX = giantBlob.dataset.startX;
+      const startY = giantBlob.dataset.startY;
+
+      // Smoothly glide coordinates back to the origin
+      giantBlob.style.transition = 'left 1500ms ease-in-out, top 1500ms ease-in-out';
+      giantBlob.style.left = `${startX}px`;
+      giantBlob.style.top = `${startY}px`;
+      
+      // Set the final inline transform explicitly so it doesn't snap when WAAPI finishes
+      giantBlob.style.transform = 'translate(-50%, -50%) scale(1)';
+      
+      // Animate ONLY the transform to provide a clean scale bounce
+      giantBlob.animate([
+        { transform: currentTransform },
+        { transform: 'translate(-50%, -50%) scale(0.95)', offset: 0.6 },
+        { transform: 'translate(-50%, -50%) scale(1.10)', offset: 0.8 },
+        { transform: 'translate(-50%, -50%) scale(1)' }
+      ], {
+        duration: 1500,
+        easing: 'ease-in-out'
+      });
+      
+      // Start crossfading the giant blob into the normal blob 300ms before the end of the bounce
+      // This creates a seamless visual handoff, masking any organic shape differences
+      setTimeout(() => {
+        if (giantBlob) {
+          giantBlob.style.transition = 'left 1500ms ease-in-out, top 1500ms ease-in-out, opacity 300ms ease';
+          giantBlob.style.opacity = '0';
+        }
+      }, 1200);
+    }
+
+    // Disable pointer events during the closing animation to prevent accidental hover flickers
+    expInteractiveContainer.style.pointerEvents = 'none';
+    setTimeout(() => {
+      expInteractiveContainer.style.pointerEvents = '';
+    }, 1500);
+
+    // Fade out the back button almost instantly so it doesn't look disconnected from the shrinking blob
+    const dynamicBackBtn = document.getElementById('exp-back-btn');
+    if (dynamicBackBtn) {
+      dynamicBackBtn.style.transition = 'opacity 100ms ease, visibility 100ms ease';
+      dynamicBackBtn.style.opacity = '0';
+      dynamicBackBtn.style.visibility = 'hidden';
+    }
+
+    // Simply resume the orbit animations after the closing animation finishes
+    setTimeout(() => {
+      expInteractiveContainer.classList.remove('is-handoff');
+      document.querySelectorAll('.exp-orbit-wrapper').forEach(orbit => {
+        orbit.style.animationPlayState = window._isExpInView ? '' : 'paused';
+      });
+    }, 1500);
+    
+    // Clear active states from content boxes ONLY after the wipe out animation completes
+    setTimeout(() => {
+      if (!expExpandedView.classList.contains('is-active')) {
+        expContentBoxes.forEach(box => {
+          box.classList.remove('is-active');
+        });
+      }
+    }, 1500);
+  });
+
+  window._isExpInView = true;
+  const expObserver = new IntersectionObserver((entries) => {
+    entries.forEach(entry => {
+      window._isExpInView = entry.isIntersecting;
+      if (!expExpandedView.classList.contains('is-active')) {
+        document.querySelectorAll('.exp-orbit-wrapper').forEach(orbit => {
+          orbit.style.animationPlayState = window._isExpInView ? '' : 'paused';
+        });
+      }
+    });
+  }, { threshold: 0 });
+  expObserver.observe(expInteractiveContainer);
+}

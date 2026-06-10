@@ -159,7 +159,7 @@ body {
   top: 0;
   left: 0;
   right: 0;
-  z-index: 999;
+  z-index: 99999;
   background: rgba(255, 255, 255, var(--top-bar-opacity-start));
   border-bottom: 1px solid rgba(255, 255, 255, 0.72);
   box-shadow: 0 12px 40px rgba(15, 23, 42, 0.08);
@@ -308,7 +308,7 @@ html.dark-mode .toggle-thumb {
   --hero-bg-end: #f6fbff;
   background: linear-gradient(90deg, var(--hero-bg-start), var(--hero-bg-end));
   transition: --hero-bg-start 300ms ease, --hero-bg-end 300ms ease, border-color 300ms ease;
-  z-index: 9999;
+  z-index: 99999;
 }
 
 html.dark-mode .hero {
@@ -1118,25 +1118,50 @@ form label {
 form input[type="text"],
 form textarea {
   width: 100%;
-  padding: var(--space-sm);
-  border: 1px solid #d7e0ef;
-  border-radius: 6px;
+  padding: 0.5rem 1rem;
+  background: rgba(255, 255, 255, 0.15);
+  border: 1px solid rgba(0, 0, 0, 0.2);
+  border-radius: 2rem;
   margin-bottom: 0;
   font: inherit;
-  background: var(--card-bg);
   color: var(--text-primary);
-  transition: background 300ms ease, color 300ms ease, border-color 300ms ease;
+  font-size: 0.95rem;
+  transition: background 300ms ease, border-color 300ms ease, color 300ms ease;
 }
 
 html.dark-mode form input[type="text"],
 html.dark-mode form textarea {
-  border-color: var(--muted-border-2);
+  background: rgba(100, 120, 180, 0.15);
+  border-color: rgba(100, 120, 180, 0.3);
+}
+
+form input[type="text"]::placeholder,
+form textarea::placeholder {
+  color: rgba(15, 23, 42, 0.5);
+  transition: color 300ms ease;
+}
+
+html.dark-mode form input[type="text"]::placeholder,
+html.dark-mode form textarea::placeholder {
+  color: rgba(200, 200, 220, 0.6);
+}
+
+form input[type="text"]:focus,
+form textarea:focus {
+  outline: none;
+  background: rgba(255, 255, 255, 0.25);
+  border-color: rgba(0, 0, 0, 0.35);
+}
+
+html.dark-mode form input[type="text"]:focus,
+html.dark-mode form textarea:focus {
+  background: rgba(100, 120, 180, 0.25);
+  border-color: rgba(100, 120, 180, 0.5);
 }
 
 form textarea {
-  min-height: 6rem;
-  padding: var(--space);
-  line-height: 1.4;
+  border-radius: 1.5rem;
+  padding: 1rem;
   resize: vertical;
 }
 
@@ -1149,23 +1174,53 @@ form textarea {
 }
 
 form button[type="submit"] {
-  background: var(--accent);
-  color: white;
-  border: none;
-  padding: 0.75rem 1.25rem;
-  border-radius: 6px;
-  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   justify-self: start;
-  transition: background 300ms ease;
+  gap: 8px;
+  color: var(--muted-text);
+  font-weight: 500;
+  font-size: 0.95rem;
+  border: 1px solid rgba(255, 255, 255, 0.18);
+  background: rgba(255, 255, 255, 0.16);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 18px rgba(0, 0, 0, 0.14);
+  padding: 8px 16px;
+  border-radius: 20px;
+  transition: color 300ms ease, background 300ms ease, transform 180ms ease, box-shadow 300ms ease;
+  width: 105px;
+  cursor: pointer;
+}
+
+html:not(.dark-mode) form button[type="submit"] {
+  border-color: transparent;
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.22),
+    0 8px 18px rgba(0, 0, 0, 0.14),
+    0 0 2px rgba(0, 0, 0, 0.15);
+}
+
+html.dark-mode form button[type="submit"] {
+  background: rgba(255, 255, 255, 0.05);
+  border-color: rgba(255, 255, 255, 0.1);
+  box-shadow:
+    inset 0 1px 0 rgba(255, 255, 255, 0.1),
+    0 8px 18px rgba(0, 0, 0, 0.2);
 }
 
 form button[type="submit"]:hover {
-  background: var(--accent-dark);
+  color: var(--heading);
+  background: rgba(255, 255, 255, 0.25);
+  transform: scale(1.05);
 }
 
-input::placeholder {
-  color: var(--muted-text);
-  transition: color 300ms ease;
+html.dark-mode form button[type="submit"]:hover {
+  color: #fff;
+  background: rgba(255, 255, 255, 0.1);
 }
 
 /* Footer */
@@ -2996,33 +3051,31 @@ html.dark-mode .liquid-bubble:hover {
 
 @keyframes liquidMorph1 {
 
-  0%,
-  100% {
-    border-radius: 42% 58% 70% 30% / 45% 45% 55% 55%;
+  0%, 100% {
+    border-radius: 46% 54% 58% 42% / 48% 46% 54% 52%;
   }
 
   34% {
-    border-radius: 70% 30% 46% 54% / 30% 29% 71% 70%;
+    border-radius: 56% 44% 48% 52% / 42% 43% 57% 58%;
   }
 
   67% {
-    border-radius: 100% 60% 60% 100% / 100% 100% 60% 60%;
+    border-radius: 60% 50% 50% 60% / 60% 60% 50% 50%;
   }
 }
 
 @keyframes liquidMorph2 {
 
-  0%,
-  100% {
+  0%, 100% {
     border-radius: 50% 50% 50% 50% / 50% 50% 50% 50%;
   }
 
   34% {
-    border-radius: 40% 60% 70% 30% / 40% 50% 60% 50%;
+    border-radius: 46% 54% 58% 42% / 45% 50% 55% 50%;
   }
 
   67% {
-    border-radius: 60% 40% 30% 70% / 60% 30% 70% 40%;
+    border-radius: 55% 45% 45% 55% / 55% 45% 55% 45%;
   }
 }
 
@@ -3199,6 +3252,358 @@ html.dark-mode .circular-glass-btn:hover {
   right: 0.5rem;
 }
 
+/* ---------- Past Experience Interactive Bubbles ---------- */
+.exp-interactive-container {
+  position: relative;
+  width: 100%;
+  min-height: 560px;
+  overflow: visible; /* Allow liquid to stretch without clipping */
+  border-radius: var(--radius);
+  background: transparent;
+  margin-top: 1rem;
+  transition: min-height 1000ms cubic-bezier(0.34, 1.56, 0.64, 1);
+}
+
+#experience-section {
+  min-height: auto;
+  position: relative;
+  z-index: 1;
+}
+
+.exp-gooey-layer, .exp-icon-layer {
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.exp-gooey-layer {
+  filter: url(#goo-exp) drop-shadow(0 0 2px rgba(0, 0, 0, 0.15)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.05));
+  z-index: 0;
+}
+
+html.dark-mode .exp-gooey-layer {
+  filter: url(#goo-exp) drop-shadow(0 0 2px rgba(0, 0, 0, 0.3)) drop-shadow(0 4px 12px rgba(0, 0, 0, 0.08));
+}
+
+.exp-icon-layer {
+  z-index: 1;
+  transition: opacity 800ms ease;
+}
+
+.exp-interactive-container.is-morphed .exp-icon-layer {
+  opacity: 0;
+  pointer-events: none;
+}
+
+/* Bubbles Shared */
+.exp-bubble-wrapper {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+}
+
+.exp-gooey-blob {
+  width: 100%;
+  height: 100%;
+  background: color-mix(in srgb, black 9%, var(--card-bg) 91%);
+  border-radius: 50%;
+  transition: all 400ms ease;
+  /* Box shadow is removed because it causes an outline in the SVG goo filter */
+}
+
+html.dark-mode .exp-gooey-blob {
+  background: color-mix(in srgb, white 4%, var(--card-bg) 96%);
+}
+html.dark-mode .exp-giant-blob {
+  background: color-mix(in srgb, white 4%, var(--card-bg) 96%);
+}
+
+.exp-liquid-bubble {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  color: var(--accent);
+  transition: all 300ms ease;
+  padding: 1rem;
+  text-align: center;
+  font-weight: 700;
+  line-height: 1.2;
+
+  border-radius: 50%;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+  background: transparent;
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 8px 18px rgba(0, 0, 0, 0.05);
+}
+
+html.dark-mode .exp-liquid-bubble {
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  background: rgba(255, 255, 255, 0.04);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 18px rgba(0, 0, 0, 0.14);
+}
+
+.exp-liquid-bubble:hover {
+  background: rgba(11, 99, 214, 0.12);
+  border-color: rgba(11, 99, 214, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.4), 0 4px 12px rgba(11, 99, 214, 0.25);
+  color: var(--accent);
+}
+html.dark-mode .exp-liquid-bubble:hover {
+  background: rgba(59, 130, 246, 0.15);
+  border-color: rgba(59, 130, 246, 0.3);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 4px 12px rgba(59, 130, 246, 0.35);
+  color: #fff;
+}
+
+.exp-bubble-text {
+  font-size: 1.1rem;
+  z-index: 2;
+}
+
+.exp-bubble-icon {
+  font-size: 3rem;
+  font-weight: 800;
+  z-index: 2;
+}
+
+/* Center Bubble */
+.exp-center-wrapper {
+  width: 150px;
+  height: 150px;
+  z-index: 10;
+}
+.exp-center-wrapper .exp-liquid-bubble,
+.exp-center-wrapper .exp-gooey-blob {
+  animation: liquidMorph1 8s ease-in-out infinite;
+}
+
+/* Orbit Zone to narrow hover region */
+.exp-orbit-zone {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  width: 480px;
+  height: 480px;
+  max-width: 100%;
+  transform: translate(-50%, -50%);
+  border-radius: 50%;
+  z-index: 10;
+}
+
+/* Orbiting Bubbles container rotations */
+.exp-orbit-wrapper {
+  width: 120px;
+  height: 120px;
+}
+
+.exp-orbit-wrapper.orbit-1 {
+  animation: orbit1 20s linear infinite;
+}
+.exp-orbit-wrapper.orbit-2 {
+  animation: orbit2 20s linear infinite;
+}
+.exp-orbit-wrapper.orbit-3 {
+  animation: orbit3 20s linear infinite;
+}
+
+/* Note: Pause animation on hover is now handled dynamically in script.js via Web Animations API for a spring wobble effect */
+
+/* Each bubble has liquid morphing too */
+.exp-orbit-wrapper.orbit-1 .exp-liquid-bubble,
+.exp-orbit-wrapper.orbit-1 .exp-gooey-blob {
+  animation: liquidMorph2 9s ease-in-out infinite reverse;
+}
+
+.exp-orbit-wrapper.orbit-2 .exp-liquid-bubble,
+.exp-orbit-wrapper.orbit-2 .exp-gooey-blob {
+  animation: liquidMorph1 10s ease-in-out infinite;
+}
+
+.exp-orbit-wrapper.orbit-3 .exp-liquid-bubble,
+.exp-orbit-wrapper.orbit-3 .exp-gooey-blob {
+  animation: liquidMorph2 8.5s ease-in-out infinite reverse;
+}
+
+@keyframes orbit1 {
+  0% { transform: translate(-50%, -50%) rotate(0deg) translate(180px) rotate(0deg); }
+  100% { transform: translate(-50%, -50%) rotate(360deg) translate(180px) rotate(-360deg); }
+}
+@keyframes orbit2 {
+  0% { transform: translate(-50%, -50%) rotate(120deg) translate(180px) rotate(-120deg); }
+  100% { transform: translate(-50%, -50%) rotate(480deg) translate(180px) rotate(-480deg); }
+}
+@keyframes orbit3 {
+  0% { transform: translate(-50%, -50%) rotate(240deg) translate(180px) rotate(-240deg); }
+  100% { transform: translate(-50%, -50%) rotate(600deg) translate(180px) rotate(-600deg); }
+}
+
+/* The Giant Blob dynamically injected by JS */
+.exp-giant-blob {
+  position: absolute;
+  background: color-mix(in srgb, black 9%, var(--card-bg) 91%);
+  z-index: 40;
+  opacity: 0;
+  pointer-events: none;
+  /* Box shadow removed because it causes a hard border to appear when overlapping out-of-sync blobs */
+  animation: liquidMorph1 9s ease-in-out infinite !important;
+}
+
+/* The Giant Bubble Expanded View Content */
+.exp-expanded-view {
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%) scale(1);
+  width: 100%;
+  height: 100%;
+  border-radius: 50%; /* Perfect bubble shape */
+  z-index: 100;
+  pointer-events: none;
+  /* Wipe animation using clip-path to mimic the bubble expanding */
+  --wipe-x: 50%;
+  --wipe-y: 50%;
+  clip-path: circle(0% at var(--wipe-x) var(--wipe-y));
+  opacity: 0; /* Fade out quickly when closing */
+  transition: clip-path 400ms ease-in, opacity 400ms ease-in;
+  display: flex;
+  flex-direction: column;
+  justify-content: center; /* Center the text inside the bubble vertically */
+  align-items: center; /* Center horizontally */
+  padding: 0; /* Padding removed, dynamically sized */
+  text-align: center;
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+html.dark-mode .exp-expanded-view {
+  background: transparent;
+  border: none;
+  box-shadow: none;
+}
+
+.exp-expanded-view.is-active {
+  clip-path: circle(100% at var(--wipe-x) var(--wipe-y));
+  opacity: 1;
+  pointer-events: auto;
+  transition: clip-path 1500ms ease-out, opacity 1500ms ease-out;
+}
+
+/* Hide the texts in the bubbles when expanded or during collapse handoff */
+.exp-interactive-container.is-morphed .exp-icon-layer,
+.exp-interactive-container.is-handoff .exp-icon-layer {
+  opacity: 0;
+  pointer-events: none;
+  transition: opacity 300ms ease;
+}
+
+/* Fade in the content inside the giant bubble */
+.exp-content-box {
+  display: none;
+  width: 100%;
+  height: 100%;
+}
+.exp-content-box.is-active {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+  padding-top: 60px; /* Push text down to avoid back button collision */
+  opacity: 1; /* Instantly opaque so the wipe effect handles the visual reveal */
+}
+.exp-content-box .section-block {
+  text-align: center; /* Override default left-align for the bubble */
+  background: transparent;
+  box-shadow: none;
+  padding: 0 2rem;
+  margin-bottom: 0;
+}
+.exp-content-box .section-block h3 {
+  font-size: 2.2rem;
+  margin-bottom: 0.5rem;
+  line-height: 1.2;
+}
+.exp-content-box .section-block p {
+  font-size: 1.25rem;
+  margin-bottom: 0.5rem;
+  opacity: 0.9;
+}
+.exp-content-box ul {
+  text-align: left; /* Keep bullet points readable */
+  margin-top: 1.5rem;
+  display: inline-block;
+  font-size: 1.15rem;
+  line-height: 1.6;
+}
+.exp-content-box ul li {
+  margin-bottom: 0.8rem;
+}
+
+@keyframes fadeIn {
+  to { opacity: 1; }
+}
+
+.exp-back-btn {
+  position: absolute;
+  z-index: 150;
+  opacity: 0;
+  visibility: hidden;
+  pointer-events: none;
+  /* Will be transitioned dynamically by JS to ride the blob */
+  transition: all 1500ms cubic-bezier(0.34, 1.56, 0.64, 1), background 200ms ease, box-shadow 200ms ease, transform 200ms ease;
+}
+
+html:not(.dark-mode) .exp-back-btn {
+  color: #111827 !important; /* Glass black triangle */
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.22), 0 8px 18px rgba(0, 0, 0, 0.14), 0 0 2px rgba(0, 0, 0, 0.15) !important;
+}
+
+.exp-interactive-container.is-morphed .exp-back-btn {
+  opacity: 1;
+  visibility: visible;
+  pointer-events: auto;
+}
+
+@media (max-width: 768px) {
+  @keyframes orbit1 {
+    0% { transform: translate(-50%, -50%) rotate(0deg) translate(120px) rotate(0deg); }
+    100% { transform: translate(-50%, -50%) rotate(360deg) translate(120px) rotate(-360deg); }
+  }
+  @keyframes orbit2 {
+    0% { transform: translate(-50%, -50%) rotate(120deg) translate(120px) rotate(-120deg); }
+    100% { transform: translate(-50%, -50%) rotate(480deg) translate(120px) rotate(-480deg); }
+  }
+  @keyframes orbit3 {
+    0% { transform: translate(-50%, -50%) rotate(240deg) translate(120px) rotate(-240deg); }
+    100% { transform: translate(-50%, -50%) rotate(600deg) translate(120px) rotate(-600deg); }
+  }
+  
+  .exp-orbit-wrapper {
+    width: 90px;
+    height: 90px;
+  }
+  .exp-center-wrapper {
+    width: 110px;
+    height: 110px;
+  }
+  .exp-bubble-text {
+    font-size: 0.8rem;
+  }
+  .exp-expanded-view {
+    padding: 0;
+  }
+}
+
+
+
 .about-blob-song-pill {
   opacity: 1;
   pointer-events: auto;
@@ -3237,4 +3642,4 @@ html:not(.dark-mode) .about-blob-song-pill .viewer-music-song-active-indicator {
     right: 1rem;
   }
 }
-
+
