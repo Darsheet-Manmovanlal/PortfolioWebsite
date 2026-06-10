@@ -478,47 +478,128 @@
       </div>
     </section>
 
-    <section class="section-panel">
+    <section class="section-panel" id="experience-section">
       <h2 id="experience">Past Experience</h2>
 
-      <div class="section-block">
-        <h3>Stratford community food hub, E15 1BG</h3>
-        <p><strong>Food Hub Assistant</strong></p>
-        <p>Apr 2021 - Jul 2021</p>
-        <ul>
-          <li>Packaged bags full of groceries, containing fruits, bread etc, handed out to people in need</li>
-          <li>Utilized teamwork skills to accelerate the process of getting food ready to be sent out through working
-            together on a single bag of produce or handling multiple pallets of bags</li>
-          <li>Showcased communication by talking through, placing crates of bags belonging to the correct side</li>
-          <li>Recorded codes of specific consumers to be handed their unique bag of food</li>
-          <li>Organisational skills applied when required to re-stock produce from newly arrived crates using a pallet
-            lifter</li>
-          <li>Actively kept the building tidy, taking out large bin bags daily</li>
-        </ul>
-      </div>
+      <div class="exp-interactive-container" id="exp-interactive-container" aria-hidden="true">
+        <!-- SVG Filters for True Liquid Physics -->
+        <svg style="visibility: hidden; position: absolute;" width="0" height="0" xmlns="http://www.w3.org/2000/svg" version="1.1">
+          <defs>
+            <filter id="goo-exp" x="-100%" y="-100%" width="300%" height="300%">
+              <feGaussianBlur in="SourceGraphic" stdDeviation="15" result="blur" />
+              <feColorMatrix in="blur" mode="matrix" values="1 0 0 0 0  0 1 0 0 0  0 0 1 0 0  0 0 0 25 -12" result="goo-exp" />
+              <feComposite in="SourceGraphic" in2="goo-exp" operator="atop" />
+            </filter>
+          </defs>
+        </svg>
 
-      <hr>
+        <!-- The Orbit Zone defines the hover area for the bubbles -->
+        <div class="exp-orbit-zone">
+          <!-- The Physics Layer -->
+          <div class="exp-gooey-layer">
+            <div class="exp-bubble-wrapper exp-center-wrapper">
+              <div class="exp-gooey-blob"></div>
+            </div>
+            <div class="exp-bubble-wrapper exp-orbit-wrapper orbit-1">
+              <div class="exp-gooey-blob"></div>
+            </div>
+            <div class="exp-bubble-wrapper exp-orbit-wrapper orbit-2">
+              <div class="exp-gooey-blob"></div>
+            </div>
+            <div class="exp-bubble-wrapper exp-orbit-wrapper orbit-3">
+              <div class="exp-gooey-blob"></div>
+            </div>
+          </div>
 
-      <div class="section-block">
-        <h3>Peacocks, East Ham</h3>
-        <p><strong>Floor Staff</strong></p>
-        <ul>
-          <li>Moved around clothing payload using cargo elevators</li>
-          <li>Assisted shoppers with directions on clothing along with other utilities</li>
-          <li>Kept the store tidy through picking up fallen clothes and gave tags to items</li>
-        </ul>
-      </div>
+          <!-- The Icon Layer -->
+          <div class="exp-icon-layer">
+            <div class="exp-bubble-wrapper exp-center-wrapper">
+              <div class="exp-liquid-bubble" data-target="exp-content-cognizant" role="button" tabindex="0" aria-label="Current Role: Cognizant">
+                <span class="exp-bubble-icon">?</span>
+              </div>
+            </div>
+            <div class="exp-bubble-wrapper exp-orbit-wrapper orbit-1">
+              <div class="exp-liquid-bubble" data-target="exp-content-foodhub" role="button" tabindex="0" aria-label="Food Hub Assistant">
+                <span class="exp-bubble-text">Food Hub Assistant</span>
+              </div>
+            </div>
+            <div class="exp-bubble-wrapper exp-orbit-wrapper orbit-2">
+              <div class="exp-liquid-bubble" data-target="exp-content-peacocks" role="button" tabindex="0" aria-label="Floor Staff">
+                <span class="exp-bubble-text">Floor Staff</span>
+              </div>
+            </div>
+            <div class="exp-bubble-wrapper exp-orbit-wrapper orbit-3">
+              <div class="exp-liquid-bubble" data-target="exp-content-remote" role="button" tabindex="0" aria-label="Remote Learning Opportunity">
+                <span class="exp-bubble-text">Remote Learning Opportunity</span>
+              </div>
+            </div>
+          </div>
+        </div>
 
-      <hr>
+        <!-- The Back Button rides the blob -->
+        <button class="viewer-back-btn exp-back-btn" id="exp-back-btn" aria-label="Back">
+          <svg viewBox="0 0 24 24" fill="currentColor">
+            <polygon points="16,4 6,12 16,20" />
+          </svg>
+        </button>
 
-      <div class="section-block">
-        <h3>Young Professionals, Online</h3>
-        <p>Aug 2019 - Aug 2019</p>
-        <ul>
-          <li>Gained insight across multiple firms such as IBM, EY, Capgemini</li>
-          <li>Listened to speakers from numerous companies on the pathways they took, e.g. apprenticeship</li>
-          <li>Made connections to these firms through linkedin</li>
-        </ul>
+        <!-- The Giant Bubble Expanded View -->
+        <div class="exp-expanded-view" id="exp-expanded-view">
+          
+          <div class="exp-content-box" id="exp-content-cognizant">
+            <div class="section-block">
+              <h3>Cognizant</h3>
+              <p><strong>QEA Graduate</strong></p>
+              <ul>
+                <li>Current working role.</li>
+                <li>Working in Quality Engineering & Assurance.</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="exp-content-box" id="exp-content-foodhub">
+            <div class="section-block">
+              <h3>Stratford community food hub, E15 1BG</h3>
+              <p><strong>Food Hub Assistant</strong></p>
+              <p>Apr 2021 - Jul 2021</p>
+              <ul>
+                <li>Packaged bags full of groceries, containing fruits, bread etc, handed out to people in need</li>
+                <li>Utilized teamwork skills to accelerate the process of getting food ready to be sent out through working
+                  together on a single bag of produce or handling multiple pallets of bags</li>
+                <li>Showcased communication by talking through, placing crates of bags belonging to the correct side</li>
+                <li>Recorded codes of specific consumers to be handed their unique bag of food</li>
+                <li>Organisational skills applied when required to re-stock produce from newly arrived crates using a pallet
+                  lifter</li>
+                <li>Actively kept the building tidy, taking out large bin bags</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="exp-content-box" id="exp-content-peacocks">
+            <div class="section-block">
+              <h3>Peacocks, East Ham</h3>
+              <p><strong>Floor Staff</strong></p>
+              <ul>
+                <li>Moved around clothing payload using cargo elevators</li>
+                <li>Assisted shoppers with directions on clothing along with other utilities</li>
+                <li>Kept the store tidy through picking up fallen clothes and gave tags to items</li>
+              </ul>
+            </div>
+          </div>
+
+          <div class="exp-content-box" id="exp-content-remote">
+            <div class="section-block">
+              <h3>Young Professionals, Online</h3>
+              <p><strong>Remote Learning Opportunity</strong></p>
+              <p>Aug 2019 - Aug 2019</p>
+              <ul>
+                <li>Gained insight across multiple firms such as IBM, EY, Capgemini</li>
+                <li>Listened to speakers from numerous companies on the pathways they took, e.g. apprenticeship</li>
+                <li>Made connections to these firms through linkedin</li>
+              </ul>
+            </div>
+          </div>
+        </div>
       </div>
     </section>
 
