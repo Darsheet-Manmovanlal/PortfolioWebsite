@@ -868,28 +868,40 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
           const startDot = dots[lastActiveIndex] || dots[0];
           const endDot = dot;
           
-          const startLeft = startDot.offsetLeft;
-          const endLeft = endDot.offsetLeft;
+          const pillRect = viewerMusicSongPill.getBoundingClientRect();
+          const borderLeft = parseFloat(getComputedStyle(viewerMusicSongPill).borderLeftWidth) || 0;
+          
+          const startRect = startDot.getBoundingClientRect();
+          const startLeft = startRect.left - pillRect.left - borderLeft;
+          const startWidth = startRect.width;
+          
+          const endRect = endDot.getBoundingClientRect();
+          const endLeft = endRect.left - pillRect.left - borderLeft;
+          const endWidth = endRect.width;
           
           const minLeft = Math.min(startLeft, endLeft);
-          const maxRight = Math.max(startLeft + startDot.offsetWidth, endLeft + endDot.offsetWidth);
+          const maxRight = Math.max(startLeft + startWidth, endLeft + endWidth);
           const stretchWidth = maxRight - minLeft;
           
           indicator.style.setProperty('--start-left', `${startLeft}px`);
-          indicator.style.setProperty('--start-width', `${startDot.offsetWidth}px`);
+          indicator.style.setProperty('--start-width', `${startWidth}px`);
           
           indicator.style.setProperty('--min-left', `${minLeft}px`);
           indicator.style.setProperty('--stretch-width', `${stretchWidth}px`);
           
           indicator.style.setProperty('--end-left', `${endLeft}px`);
-          indicator.style.setProperty('--end-width', `${endDot.offsetWidth}px`);
+          indicator.style.setProperty('--end-width', `${endWidth}px`);
           
           indicator.classList.remove('is-stretching');
           void indicator.offsetWidth; // Force reflow
           indicator.classList.add('is-stretching');
         } else {
-          indicator.style.setProperty('--end-left', `${dot.offsetLeft}px`);
-          indicator.style.setProperty('--end-width', `${dot.offsetWidth}px`);
+          const pillRect = viewerMusicSongPill.getBoundingClientRect();
+          const borderLeft = parseFloat(getComputedStyle(viewerMusicSongPill).borderLeftWidth) || 0;
+          const dotRect = dot.getBoundingClientRect();
+          
+          indicator.style.setProperty('--end-left', `${dotRect.left - pillRect.left - borderLeft}px`);
+          indicator.style.setProperty('--end-width', `${dotRect.width}px`);
           indicator.classList.remove('is-stretching');
         }
       }
@@ -2360,8 +2372,12 @@ function updateBlobIndicator(index) {
     dot.classList.toggle('is-active', i === index);
   });
   if (blobDots[index] && blobActiveIndicator) {
-    const targetLeft = blobDots[index].offsetLeft;
-    const targetWidth = blobDots[index].offsetWidth;
+    const pillRect = blobActiveIndicator.parentElement.getBoundingClientRect();
+    const dotRect = blobDots[index].getBoundingClientRect();
+    const borderLeft = parseFloat(getComputedStyle(blobActiveIndicator.parentElement).borderLeftWidth) || 0;
+    
+    const targetLeft = dotRect.left - pillRect.left - borderLeft;
+    const targetWidth = dotRect.width;
     const currentLeft = parseFloat(getComputedStyle(blobActiveIndicator).left) || targetLeft;
     const currentWidth = parseFloat(getComputedStyle(blobActiveIndicator).width) || targetWidth;
     

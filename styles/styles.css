@@ -240,7 +240,7 @@ html.dark-mode .search-bar::placeholder {
 
 .search-bar:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.06);
   border-color: rgba(0, 0, 0, 0.35);
 }
 
@@ -1149,7 +1149,7 @@ html.dark-mode form textarea::placeholder {
 form input[type="text"]:focus,
 form textarea:focus {
   outline: none;
-  background: rgba(255, 255, 255, 0.25);
+  background: rgba(0, 0, 0, 0.06);
   border-color: rgba(0, 0, 0, 0.35);
 }
 
@@ -1161,7 +1161,7 @@ html.dark-mode form textarea:focus {
 
 form textarea {
   border-radius: 1.5rem;
-  padding: 1rem;
+  padding: 0.5rem 1rem;
   resize: vertical;
 }
 
@@ -2124,6 +2124,7 @@ html.dark-mode .about-section.is-expanded {
   bottom: 0.75rem;
   transform: translateX(-50%) translateY(0.35rem);
   align-self: center;
+  box-sizing: border-box;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -2206,18 +2207,20 @@ html.dark-mode .about-section.is-expanded {
   cursor: pointer;
   opacity: 0.8;
   padding: 0;
+  margin: 0;
+  display: block;
+  box-sizing: border-box;
   transition: transform 200ms ease, background 200ms ease, opacity 200ms ease;
 }
 
 .viewer-music-song-dot:hover {
   background: rgba(255, 255, 255, 0.23);
   opacity: 1;
-  transform: scale(1.12);
 }
 
 .viewer-music-song-dot.is-active {
   opacity: 1;
-  transform: scale(1.12);
+  background: transparent;
 }
 
 .viewer-music-segment {
@@ -2994,8 +2997,11 @@ html:not(.dark-mode) .gooey-layer {
   max-width: 14rem;
   padding: 0.38rem 0.55rem;
   border-radius: 8px;
-  background: rgba(10, 14, 28, 0.94);
-  color: #fff;
+  background: rgba(0, 0, 0, 0.06);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(0, 0, 0, 0.1);
+  color: var(--text-primary);
   font-size: 0.68rem;
   font-weight: 700;
   line-height: 1.2;
@@ -3004,8 +3010,17 @@ html:not(.dark-mode) .gooey-layer {
   pointer-events: none;
   transition: opacity 160ms ease, transform 160ms ease;
   white-space: normal;
-  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.22);
+  box-shadow: 0 8px 22px rgba(0, 0, 0, 0.05);
   z-index: 100;
+}
+
+html.dark-mode .liquid-bubble::after {
+  background: rgba(255, 255, 255, 0.06);
+  backdrop-filter: blur(18px) saturate(150%);
+  -webkit-backdrop-filter: blur(18px) saturate(150%);
+  border: 1px solid rgba(255, 255, 255, 0.14);
+  color: #fff;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.1), 0 8px 22px rgba(0, 0, 0, 0.22);
 }
 
 .liquid-bubble:hover::after {
@@ -3627,6 +3642,10 @@ html:not(.dark-mode) .about-blob-song-pill .viewer-music-song-dot {
 
 html:not(.dark-mode) .about-blob-song-pill .viewer-music-song-dot:hover {
   background: rgba(0, 0, 0, 0.4);
+}
+
+html:not(.dark-mode) .about-blob-song-pill .viewer-music-song-dot.is-active {
+  background: transparent;
 }
 
 html:not(.dark-mode) .about-blob-song-pill .viewer-music-song-active-indicator {
