@@ -454,6 +454,17 @@ if (imageViewer && viewerImage && viewerBackBtn && aboutExpanded) {
       segments: JSON.stringify([
         { start: 13, end: 166, label: 'Darsheet', color: '#f59e0b' }
       ])
+    },
+    {
+      src: 'audio/maggotsForBrains.mp4',
+      title: 'maggots for brains -|Olivia Rodrigo|(cover)',
+      kicker: 'BANDLAB COVER',
+      durationSeconds: '157',
+      minVisibleGapPixels: String(DEFAULT_MIN_VISIBLE_GAP_PIXELS),
+      edgeInsetSeconds: String(DEFAULT_EDGE_INSET_SECONDS),
+      segments: JSON.stringify([
+        { start: 12, end: 157, label: 'Darsheet', color: '#f59e0b' }
+      ])
     }
   ] : [];
 
